@@ -1,0 +1,141 @@
+<!doctype html>
+<!-- CWS Screenshot 2 — Polymarket page with PolyParlay pill + drawer. 1280×800. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PolyParlay — On Polymarket</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_styles.css" />
+  <style>
+    body { width: 1280px; height: 800px; background: #0f1729; background-image: none; color: white; }
+    /* Mock PM page background */
+    .pm-fake { position: absolute; inset: 0; padding: 32px 64px; font-family: 'Inter', sans-serif; color: #cbd5e1; }
+    .pm-nav { display: flex; gap: 24px; font-size: 14px; font-weight: 600; margin-bottom: 40px; color: #94a3b8; }
+    .pm-nav .logo { color: white; font-size: 18px; font-weight: 900; letter-spacing: -0.02em; }
+    .pm-market { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 36px 36px 30px; max-width: 740px; }
+    .pm-q { color: white; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 18px; }
+    .pm-meta { display: flex; gap: 24px; font-size: 13px; color: #94a3b8; margin-bottom: 26px; font-family: 'JetBrains Mono', monospace; }
+    .pm-meta span strong { color: white; font-weight: 700; }
+    .pm-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .pm-side { background: #0f1729; border: 1px solid #475569; border-radius: 8px; padding: 14px 18px; }
+    .pm-side .lbl { font-size: 11px; color: #94a3b8; letter-spacing: 1.4px; text-transform: uppercase; font-weight: 700; }
+    .pm-side .px { font-size: 28px; font-weight: 900; margin-top: 6px; color: white; font-family: 'JetBrains Mono', monospace; }
+    .pm-side.yes .px { color: #4ade80; }
+    .pm-side.no .px { color: #f87171; }
+    .pm-buy { display: flex; gap: 12px; }
+    .pm-btn { flex: 1; background: #334155; color: white; border: 0; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 15px; }
+    .pm-btn.buy { background: #16a34a; }
+    .pm-btn.sell { background: #dc2626; }
+
+    /* PolyParlay floating pill on the right */
+    .pp-pill {
+      position: absolute; right: 36px; top: 50%; transform: translateY(-50%);
+      background: var(--bg); color: var(--ink);
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      padding: 14px 22px;
+      font-weight: 900; font-size: 16px;
+      box-shadow: 5px 5px 0 var(--amber);
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Inter', sans-serif;
+    }
+    .pp-pill .plus { background: var(--accent); color: white; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; border: 1.5px solid var(--ink); }
+
+    /* PolyParlay drawer at bottom right */
+    .pp-drawer {
+      position: absolute; right: 36px; bottom: 36px;
+      width: 460px;
+      background: var(--bg-2); color: var(--ink);
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 6px 6px 0 var(--ink);
+      font-family: 'Inter', sans-serif;
+    }
+    .drawer-head { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; color: var(--accent); padding-bottom: 10px; border-bottom: 1.5px dashed var(--ink); margin-bottom: 10px; }
+    .dr-status { color: var(--green); }
+    .dr-leg { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; padding: 8px 4px; align-items: center; font-size: 13px; }
+    .dr-num { background: var(--ink); color: var(--bg); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 5px; }
+    .dr-q { color: var(--ink); font-weight: 700; }
+    .dr-q .side { color: var(--green); font-weight: 800; font-size: 11px; margin-left: 6px; font-family: 'JetBrains Mono', monospace; }
+    .dr-px { color: var(--ink); font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+    .dr-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1.5px dashed var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-2); }
+    .dr-foot strong { color: var(--ink); font-weight: 900; font-size: 16px; }
+    .dr-cta { background: var(--ink); color: var(--bg); border: 1.5px solid var(--ink); padding: 7px 14px; border-radius: 6px; font-weight: 800; font-size: 11px; letter-spacing: 0.4px; box-shadow: 2px 2px 0 var(--amber); cursor: pointer; }
+
+    /* Caption banner across the top */
+    .caption { position: absolute; top: 0; left: 0; right: 0; background: var(--ink); color: var(--bg); padding: 14px 36px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+    .caption .live { color: var(--green); }
+    .caption .accent { color: var(--amber); }
+  </style>
+</head>
+<body>
+  <div class="caption">
+    <span><span class="live">●</span> Floating "Add to slip" pill on <span class="accent">every Polymarket market</span></span>
+    <span>↓ PolyParlay slip drawer auto-appears after add</span>
+  </div>
+
+  <div class="pm-fake" style="padding-top: 80px;">
+    <div class="pm-nav">
+      <span class="logo">Polymarket</span>
+      <span>Markets</span>
+      <span>Sports</span>
+      <span>Politics</span>
+      <span>Crypto</span>
+    </div>
+    <div class="pm-market">
+      <h2 class="pm-q">Will the Fed cut rates at the June 2026 meeting?</h2>
+      <div class="pm-meta">
+        <span>RESOLVES <strong>18 JUN 2026</strong></span>
+        <span>VOL 24H <strong>$847,322</strong></span>
+        <span>LIQ <strong>$2.1M</strong></span>
+      </div>
+      <div class="pm-prices">
+        <div class="pm-side yes">
+          <div class="lbl">YES</div>
+          <div class="px">$0.62</div>
+        </div>
+        <div class="pm-side no">
+          <div class="lbl">NO</div>
+          <div class="px">$0.38</div>
+        </div>
+      </div>
+      <div class="pm-buy">
+        <button class="pm-btn buy">Buy YES</button>
+        <button class="pm-btn sell">Buy NO</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pp-pill">
+    <span class="plus">+</span>
+    <span>Add to slip</span>
+  </div>
+
+  <div class="pp-drawer">
+    <div class="drawer-head">
+      <span>// YOUR PARLAY · 3 LEGS</span>
+      <span class="dr-status">● ADDED</span>
+    </div>
+    <div class="dr-leg">
+      <div class="dr-num">01</div>
+      <div class="dr-q">Fed cuts June 2026 <span class="side">YES</span></div>
+      <div class="dr-px">$0.62</div>
+    </div>
+    <div class="dr-leg">
+      <div class="dr-num">02</div>
+      <div class="dr-q">Lakers over 102.5 <span class="side">YES</span></div>
+      <div class="dr-px">$0.61</div>
+    </div>
+    <div class="dr-leg">
+      <div class="dr-num">03</div>
+      <div class="dr-q">BTC ≤ $100K · May 31 <span class="side">YES</span></div>
+      <div class="dr-px">$0.29</div>
+    </div>
+    <div class="dr-foot">
+      <span>Multiplier <strong>9.10×</strong></span>
+      <button class="dr-cta">Open extension →</button>
+    </div>
+  </div>
+</body>
+</html>

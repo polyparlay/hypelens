@@ -1,0 +1,24 @@
+# HypeLens liquidation-alert worker — deploy with:  npx wrangler deploy -c wrangler.alerts.toml
+name = "hypelens-alerts"
+main = "liq-alerts.js"
+compatibility_date = "2026-05-01"
+
+# Cron: poll HL every 5 min, detect cascades, post to Telegram (+ X if keys set).
+[triggers]
+crons = ["*/5 * * * *"]
+
+# KV for state (prev OI snapshot, rate limits, daily flags). Create with:
+#   npx wrangler kv namespace create HL_KV
+# then paste the id:
+# [[kv_namespaces]]
+# binding = "HL_KV"
+# id = "REPLACE_WITH_KV_ID"
+
+[vars]
+INSTALL_URL = "https://chromewebstore.google.com/detail/REPLACE_WITH_EXTENSION_ID"
+
+# Secrets (set after `wrangler login`):
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN     -c wrangler.alerts.toml   # @BotFather (PolyParlay bot reusable)
+#   npx wrangler secret put TELEGRAM_CHANNEL_ID    -c wrangler.alerts.toml   # e.g. @hypelens_alerts (add the bot as admin)
+# Optional X/Twitter (only if you add x-poster.js + a paid X API tier):
+#   npx wrangler secret put X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_SECRET

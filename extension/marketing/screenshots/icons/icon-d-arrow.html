@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Icon D: Bold upward arrow — "your odds go up". Symbol-driven. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 128px; height: 128px; background: #f5f1e8; }
+    .tile {
+      width: 128px; height: 128px;
+      background: #0a0c14;
+      border: 4px solid #0a0c14;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Three ascending bars + arrow head */
+    .bars {
+      position: absolute; bottom: 18px; left: 14px;
+      display: flex; align-items: flex-end; gap: 6px;
+    }
+    .b1 { width: 18px; height: 32px; background: #6366f1; border: 3px solid #f5f1e8; border-bottom: 0; }
+    .b2 { width: 18px; height: 54px; background: #fbbf24; border: 3px solid #f5f1e8; border-bottom: 0; }
+    .b3 { width: 18px; height: 76px; background: #16a34a; border: 3px solid #f5f1e8; border-bottom: 0; }
+    /* Arrow pointing up-right */
+    .arrow {
+      position: absolute; top: 16px; right: 14px;
+      color: #fbbf24;
+      font-size: 56px; font-weight: 900; line-height: 1;
+      font-family: -apple-system, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="tile">
+    <div class="bars">
+      <div class="b1"></div>
+      <div class="b2"></div>
+      <div class="b3"></div>
+    </div>
+    <div class="arrow">↗</div>
+  </div>
+</body>
+</html>

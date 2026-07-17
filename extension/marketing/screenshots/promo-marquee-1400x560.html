@@ -1,0 +1,111 @@
+<!doctype html>
+<!-- CWS Marquee promo tile — 1400×560 — JPEG/PNG no alpha required by CWS. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PolyParlay — Marquee promo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_styles.css" />
+  <style>
+    body { width: 1400px; height: 560px; }
+    .frame { width: 1400px; height: 560px; display: grid; grid-template-columns: 1.25fr 1fr; gap: 60px; padding: 56px 80px; align-items: center; position: relative; }
+    .brand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+    .brand-mark { width: 50px; height: 50px; background: var(--ink); border-radius: 11px; display: flex; align-items: center; justify-content: center; padding: 0 6px; font-weight: 900; font-size: 28px; line-height: 1; letter-spacing: -2px; box-shadow: 4px 4px 0 var(--ink); }
+    .brand-mark .p1 { color: var(--accent); }
+    .brand-mark .p2 { color: var(--amber); }
+    .brand-name { font-weight: 900; font-size: 28px; letter-spacing: -0.02em; }
+    .live-pill { background: var(--ink); color: var(--bg); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; padding: 6px 12px; border-radius: 6px; }
+    .live-pill .dot { color: var(--green); margin-right: 4px; }
+    h1 { font-size: 64px; line-height: 0.98; font-weight: 900; letter-spacing: -0.04em; margin: 0 0 22px; }
+    h1 .amber { color: var(--amber-dk); }
+    h1 .accent { color: var(--accent); }
+    .lede { font-size: 18px; line-height: 1.5; color: var(--ink-2); margin: 0 0 24px; max-width: 580px; }
+    .lede strong { color: var(--ink); font-weight: 800; }
+    .pills { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .pill { background: var(--ink); color: var(--bg); font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; padding: 8px 13px; border-radius: 6px; border: 1.5px solid var(--ink); }
+    .pill.amber { background: var(--amber); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+    .pill.green { background: var(--green); color: white; box-shadow: 3px 3px 0 var(--ink); }
+    .domain { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: var(--ink); letter-spacing: 1px; margin-left: auto; }
+    .domain::before { content: '↗ '; color: var(--amber-dk); }
+
+    /* Popup mock — compressed */
+    .popup { background: var(--bg-2); border: 2px solid var(--ink); border-radius: 14px; padding: 18px 18px 20px; box-shadow: 7px 7px 0 var(--ink); width: 100%; max-width: 430px; justify-self: center; }
+    .pp-head { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: var(--accent); padding: 0 4px 9px; border-bottom: 1.5px dashed var(--ink); margin-bottom: 10px; }
+    .pp-pro { color: var(--ink); background: var(--amber); padding: 3px 7px; border: 1.5px solid var(--ink); border-radius: 5px; font-size: 9px; box-shadow: 2px 2px 0 var(--ink); }
+    .leg { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; padding: 9px 11px; background: white; border: 1.5px solid var(--ink); border-radius: 7px; margin-bottom: 6px; align-items: center; box-shadow: 2px 2px 0 var(--ink); }
+    .leg.flipped { border-color: var(--green); box-shadow: 2px 2px 0 var(--green); }
+    .leg-q { color: var(--ink); font-weight: 700; font-size: 12.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .leg-meta { color: var(--muted); font-size: 10px; font-family: 'JetBrains Mono', monospace; margin-top: 2px; letter-spacing: 0.4px; }
+    .leg-meta .yes { color: var(--green); font-weight: 800; }
+    .leg.flipped .leg-meta { color: var(--green); font-weight: 800; }
+    .leg-price { font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--ink); font-size: 14px; text-align: right; min-width: 54px; }
+    .leg.flipped .leg-price { color: var(--green); }
+    .sim { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 11px 12px; margin-top: 9px; background: var(--ink); color: var(--bg); border: 1.5px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--amber); }
+    .sim-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1.4px; color: var(--amber); text-transform: uppercase; margin-bottom: 3px; font-weight: 800; }
+    .wr { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; color: #86efac; display: flex; align-items: baseline; gap: 6px; }
+    .wr small { font-size: 11px; color: #9ca3af; font-weight: 600; letter-spacing: 0.8px; }
+    .pp { background: var(--green); color: #022; font-size: 10px; padding: 2px 5px; border-radius: 3px; font-weight: 800; }
+    .histo { display: grid; grid-template-columns: repeat(14, 1fr); align-items: end; gap: 2px; height: 32px; }
+    .histo .b { background: var(--amber); border-radius: 1px; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div>
+      <div class="brand-row">
+        <span class="brand-mark"><span class="p1">P</span><span class="p2">P</span></span>
+        <span class="brand-name">PolyParlay</span>
+        <span class="live-pill"><span class="dot">●</span> LIVE V1.0</span>
+      </div>
+      <h1>Stop guessing<br/>your <span class="amber">parlay odds.</span></h1>
+      <p class="lede">
+        Free Chrome extension for Polymarket. Runs <strong>10,000 Monte Carlo sims</strong> per slip,
+        flips your weakest leg with Improve Odds, and computes <strong>Half-Kelly bet sizing</strong>.
+      </p>
+      <div class="pills">
+        <span class="pill green">FREE up to 3 legs</span>
+        <span class="pill amber">Pro $14.99/mo</span>
+        <span class="pill">No wallet connect</span>
+        <span class="domain">polyparlay.app</span>
+      </div>
+    </div>
+
+    <div class="popup">
+      <div class="pp-head">
+        <span>// POLYPARLAY · 03 LEGS</span>
+        <span class="pp-pro">PRO</span>
+      </div>
+      <div class="leg">
+        <div>
+          <div class="leg-q">Fed cuts rates June 2026</div>
+          <div class="leg-meta"><span class="yes">YES</span> · RESOLVES 18 JUN</div>
+        </div>
+        <div class="leg-price">$0.62</div>
+      </div>
+      <div class="leg">
+        <div>
+          <div class="leg-q">Lakers over 102.5 vs Nuggets</div>
+          <div class="leg-meta"><span class="yes">YES</span> · RESOLVES TONIGHT</div>
+        </div>
+        <div class="leg-price">$0.61</div>
+      </div>
+      <div class="leg flipped">
+        <div>
+          <div class="leg-q">BTC ≤ $100K by May 31</div>
+          <div class="leg-meta">NO · FLIPPED ✓</div>
+        </div>
+        <div class="leg-price">$0.71</div>
+      </div>
+      <div class="sim">
+        <div>
+          <div class="sim-label">// 10K MC</div>
+          <div class="wr">57% <small>WR</small> <span class="pp">+21pp</span></div>
+        </div>
+        <div class="histo">
+          <div class="b" style="height: 18%"></div><div class="b" style="height: 32%"></div><div class="b" style="height: 54%"></div><div class="b" style="height: 78%"></div><div class="b" style="height: 92%"></div><div class="b" style="height: 100%"></div><div class="b" style="height: 88%"></div><div class="b" style="height: 64%"></div><div class="b" style="height: 42%"></div><div class="b" style="height: 28%"></div><div class="b" style="height: 18%"></div><div class="b" style="height: 10%"></div><div class="b" style="height: 6%"></div><div class="b" style="height: 3%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

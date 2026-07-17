@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- LAUNCH popup (read-only). Loads ONLY the read-only heatmap/planner — no
+         Module 3 placement scripts, for a minimal store-review footprint. The
+         phase-2 popup (popup.module3.html) adds the exchange scripts. popup.js's
+         placement mount is a no-op here because window.HLX3 is never defined. -->
+    <link rel="stylesheet" href="content.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <span class="brand"><span class="dot"></span>HypeLens</span>
+      <select id="coinSel" title="Coin"></select>
+      <button id="refresh" class="pop-refresh" title="Refresh">↻</button>
+    </header>
+    <div id="hud"></div>
+    <div id="placeMount"></div>
+    <div class="pop-note" id="popNote"></div>
+
+    <script src="viewmodel.js"></script>
+    <script src="vendor/lightweight-charts.standalone.production.js"></script>
+    <script src="hud.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

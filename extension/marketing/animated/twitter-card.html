@@ -1,0 +1,319 @@
+<!doctype html>
+<!--
+  TWITTER / X CARD — 1200×675 landscape, animated popup demo on the right.
+  Record as MP4 with QuickTime (cmd-5 → "Record Selected Portion" → drag
+  to match the 1200×675 area → record ~7 seconds covering one full loop).
+  Twitter accepts MP4 up to 2:20, GIF up to 15MB. MP4 is preferred — better
+  compression and plays without click on most clients.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PolyParlay — Twitter card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f1e8;  --bg-2: #fdfcf7; --ink: #0a0c14; --ink-2: #1f2937;
+      --muted: #6b6f7a; --accent: #4f46e5; --amber: #fbbf24;
+      --green: #16a34a; --red: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      width: 1200px; height: 675px;
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      background-image: radial-gradient(circle at 1px 1px, rgba(10,12,20,0.08) 1px, transparent 0);
+      background-size: 22px 22px;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .frame { width: 1200px; height: 675px; display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 48px; padding: 56px 64px; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2.4px; text-transform: uppercase;
+      background: var(--bg-2); border: 1.5px solid var(--ink);
+      padding: 7px 13px; border-radius: 6px;
+      box-shadow: 3px 3px 0 var(--ink);
+      margin-bottom: 22px;
+    }
+    .eyebrow .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+    h1 {
+      font-size: 64px; line-height: 0.98;
+      font-weight: 900; letter-spacing: -0.04em;
+      margin: 0 0 22px; color: var(--ink);
+    }
+    h1 .amber { color: #b45309; }
+    h1 .accent { color: var(--accent); }
+    .lede {
+      font-size: 19px; line-height: 1.45; color: var(--ink-2);
+      margin: 0 0 28px; max-width: 480px;
+    }
+    .lede strong { color: var(--ink); font-weight: 800; }
+    .cta-row { display: flex; align-items: center; gap: 18px; }
+    .cta {
+      display: inline-flex; align-items: center;
+      padding: 14px 24px;
+      background: var(--accent); color: white;
+      border: 1.5px solid var(--ink);
+      border-radius: 9px;
+      font-weight: 900; font-size: 17px;
+      letter-spacing: 0.2px;
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+    .domain {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px; font-weight: 700;
+      letter-spacing: 1.2px;
+      color: var(--ink);
+    }
+    .domain::before { content: '↗ '; color: var(--amber); }
+
+    /* ===========================================================
+       POPUP MOCK — full animation, 6s loop
+       =========================================================== */
+    .popup {
+      background: var(--bg-2); border: 1.5px solid var(--ink);
+      border-radius: 14px; padding: 18px 18px 22px;
+      box-shadow: 6px 6px 0 var(--ink);
+      width: 440px;
+      justify-self: center;
+      position: relative;
+    }
+    .pp-head {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 1.6px; text-transform: uppercase;
+      color: var(--accent);
+      padding: 0 4px 10px; border-bottom: 1.5px dashed var(--ink);
+      margin-bottom: 12px;
+    }
+    .pp-pro {
+      color: var(--ink); background: var(--amber);
+      padding: 3px 7px; border: 1.5px solid var(--ink);
+      border-radius: 5px; font-size: 9px;
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .leg {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px; padding: 9px 12px;
+      background: white;
+      border: 1.5px solid var(--ink);
+      border-radius: 7px;
+      margin-bottom: 7px;
+      align-items: center;
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+    .leg > :first-child { min-width: 0; }
+    .leg-q  { color: var(--ink); font-weight: 700; font-size: 13px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .leg-meta { color: var(--muted); font-size: 10.5px; font-family: 'JetBrains Mono', monospace; margin-top: 3px; letter-spacing: 0.4px; white-space: nowrap; }
+    .leg-meta .yes { color: var(--green); font-weight: 800; }
+    .leg-meta .no  { color: var(--red);   font-weight: 800; }
+    .leg-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800; color: var(--ink); font-size: 15px;
+      text-align: right; min-width: 56px;
+    }
+
+    .leg.swap { animation: leg-swap 6s steps(1, end) infinite; }
+    @keyframes leg-swap {
+      0%, 24%   { border-color: var(--red);   box-shadow: 2px 2px 0 var(--red); }
+      25%, 100% { border-color: var(--green); box-shadow: 2px 2px 0 var(--green); }
+    }
+    .stack { display: inline-grid; grid-template-areas: 'stack'; vertical-align: top; }
+    .stack > * { grid-area: stack; white-space: nowrap; }
+    .stack .raw { animation: fade-out 6s steps(1, end) infinite; }
+    .stack .new { animation: fade-in  6s steps(1, end) infinite; opacity: 0; }
+    @keyframes fade-out { 0%, 24% { opacity: 1; } 25%, 100% { opacity: 0; } }
+    @keyframes fade-in  { 0%, 24% { opacity: 0; } 25%, 100% { opacity: 1; } }
+
+    .improve {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px;
+      background: var(--accent); color: white;
+      border: 1.5px solid var(--ink);
+      border-radius: 7px;
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.4px;
+      box-shadow: 2px 2px 0 var(--ink);
+      animation: improve 6s steps(1, end) infinite;
+      opacity: 0;
+    }
+    @keyframes improve {
+      0%, 14% { opacity: 0; }
+      15%, 24% { opacity: 1; }
+      25%, 100% { opacity: 0; }
+    }
+
+    .sim {
+      display: grid; grid-template-columns: auto 1fr; gap: 12px;
+      align-items: center;
+      padding: 11px 12px; margin-top: 10px;
+      background: var(--ink); color: var(--bg);
+      border: 1.5px solid var(--ink);
+      border-radius: 8px;
+      box-shadow: 3px 3px 0 var(--amber);
+    }
+    .sim-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: 1.4px;
+      color: var(--amber); text-transform: uppercase;
+      margin-bottom: 3px; font-weight: 700;
+    }
+    .wr-wrap { position: relative; min-width: 132px; }
+    .wr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 26px; font-weight: 900;
+      line-height: 1; letter-spacing: -0.03em;
+      display: flex; align-items: baseline; gap: 6px;
+    }
+    .wr small { font-size: 11px; color: #9ca3af; font-weight: 600; letter-spacing: 0.8px; }
+    .wr .pp { background: var(--green); color: #022; font-size: 10.5px; padding: 2px 6px; border-radius: 3px; font-weight: 800; margin-left: 3px; }
+
+    .histo { display: grid; grid-template-columns: repeat(14, 1fr); align-items: end; gap: 2px; height: 36px; }
+    .histo .b { background: var(--amber); border-radius: 1px; height: var(--h); animation: histo-pulse 1.4s ease-in-out var(--d, 0s) infinite; opacity: 0.85; }
+    @keyframes histo-pulse {
+      0%, 100% { transform: scaleY(1);   opacity: 0.85; }
+      50%      { transform: scaleY(0.6); opacity: 1; }
+    }
+
+    .stake {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 12px; align-items: center;
+      padding: 11px 14px; margin-top: 8px;
+      background: var(--amber);
+      border: 1.5px solid var(--ink);
+      border-radius: 8px;
+      box-shadow: 3px 3px 0 var(--ink);
+      animation: stake-show 6s ease-out infinite;
+      opacity: 0; transform: translateY(8px);
+    }
+    .stake-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 1.4px; color: var(--ink); text-transform: uppercase; font-weight: 800; margin-bottom: 2px; }
+    .stake-sub { font-size: 11px; color: var(--ink-2); font-family: 'JetBrains Mono', monospace; }
+    .stake-val { font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 900; color: var(--ink); letter-spacing: -0.03em; line-height: 1; }
+    .stake-val .of { font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+    @keyframes stake-show {
+      0%, 44%   { opacity: 0; transform: translateY(8px); }
+      50%, 96%  { opacity: 1; transform: translateY(0); }
+      100%      { opacity: 0; transform: translateY(8px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+
+    <div>
+      <div class="eyebrow"><span class="dot"></span> POLYPARLAY · LIVE NOW</div>
+      <h1>Win rate <span class="amber">+21pp</span><br/>in one click.</h1>
+      <p class="lede">
+        Standard parlay tools <strong>multiply prices</strong>. PolyParlay runs
+        <strong>10,000 Monte Carlo sims</strong>, flips your weakest leg, and
+        computes <strong>Kelly bet size</strong> — automatically.
+      </p>
+      <div class="cta-row">
+        <span class="cta">Install free →</span>
+        <span class="domain">polyparlay.app</span>
+      </div>
+    </div>
+
+    <div class="popup">
+      <div class="pp-head">
+        <span>// POLYPARLAY · 03 LEGS</span>
+        <span class="pp-pro">PRO</span>
+      </div>
+
+      <div class="leg">
+        <div>
+          <div class="leg-q">Fed cuts rates June 2026</div>
+          <div class="leg-meta"><span class="yes">YES</span> · RESOLVES 18 JUN</div>
+        </div>
+        <div class="leg-price">$0.62</div>
+      </div>
+      <div class="leg">
+        <div>
+          <div class="leg-q">Lakers over 102.5 vs Nuggets</div>
+          <div class="leg-meta"><span class="yes">YES</span> · RESOLVES TONIGHT</div>
+        </div>
+        <div class="leg-price">$0.61</div>
+      </div>
+
+      <div class="leg swap">
+        <div>
+          <div class="leg-q">
+            <span class="stack">
+              <span class="raw">BTC above $100K by May 31</span>
+              <span class="new">BTC ≤ $100K by May 31</span>
+            </span>
+          </div>
+          <div class="leg-meta">
+            <span class="stack">
+              <span class="raw" style="color:var(--red); font-weight:800;">YES · WEAK LEG</span>
+              <span class="new" style="color:var(--green); font-weight:800;">NO · FLIPPED ✓</span>
+            </span>
+          </div>
+        </div>
+        <div class="leg-price">
+          <span class="stack">
+            <span class="raw" style="color:var(--red);">$0.29</span>
+            <span class="new" style="color:var(--green);">$0.71</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="improve">
+        <span style="font-weight:900;font-size:13px;">↗</span>
+        <span>Improve Odds: flip BTC leg → 57% WR</span>
+      </div>
+
+      <div class="sim">
+        <div>
+          <div class="sim-label">// 10K MC</div>
+          <div class="wr-wrap">
+            <div class="stack">
+              <div class="wr raw"  style="color:#fca5a5;">36% <small>WR</small></div>
+              <div class="wr new"  style="color:#86efac;">57% <small>WR</small> <span class="pp">+21pp</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="histo">
+          <div class="b" style="--h:18%;--d:0.0s"></div>
+          <div class="b" style="--h:32%;--d:0.1s"></div>
+          <div class="b" style="--h:54%;--d:0.2s"></div>
+          <div class="b" style="--h:78%;--d:0.3s"></div>
+          <div class="b" style="--h:92%;--d:0.4s"></div>
+          <div class="b" style="--h:100%;--d:0.5s"></div>
+          <div class="b" style="--h:88%;--d:0.6s"></div>
+          <div class="b" style="--h:64%;--d:0.7s"></div>
+          <div class="b" style="--h:42%;--d:0.8s"></div>
+          <div class="b" style="--h:28%;--d:0.9s"></div>
+          <div class="b" style="--h:18%;--d:1.0s"></div>
+          <div class="b" style="--h:10%;--d:1.1s"></div>
+          <div class="b" style="--h:6%; --d:1.2s"></div>
+          <div class="b" style="--h:3%; --d:1.3s"></div>
+        </div>
+      </div>
+
+      <div class="stake">
+        <div>
+          <div class="stake-lbl">★ HALF-KELLY STAKE</div>
+          <div class="stake-sub">$500 bankroll · 57% WR · 3.4× mult</div>
+        </div>
+        <div class="stake-val">$58<span class="of"> /$500</span></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

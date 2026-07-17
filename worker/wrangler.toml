@@ -1,0 +1,35 @@
+name = "polyparlay-verify"
+main = "verify.js"
+compatibility_date = "2026-05-01"
+
+# Non-secret config (safe to commit):
+[vars]
+PAYMENT_ADDRESS = "0x9548B8E9554a1968843B3C380431b10996247c88"
+
+# Cloudflare KV namespace for the public leaderboard + telegram subscriptions.
+# Create with:
+#   wrangler kv namespace create LEADERBOARD
+# Then paste the returned id into LEADERBOARD_ID below.
+# (Leave the binding commented if you haven't set up KV yet — those
+# endpoints will return "feature unavailable" instead of crashing.)
+# [[kv_namespaces]]
+# binding = "LEADERBOARD"
+# id = "REPLACE_WITH_KV_ID"
+#
+# Secrets for Telegram alerts (set with `wrangler secret put TELEGRAM_BOT_TOKEN`):
+#   TELEGRAM_BOT_TOKEN — from @BotFather on Telegram
+#
+# Cron schedule for alert polling — every 15 min:
+# [triggers]
+# crons = ["*/15 * * * *"]
+
+# Secrets to set after `wrangler login`:
+#   wrangler secret put POLYGONSCAN_KEY      (free at polygonscan.com/myapikey)
+# (PAYMENT_ADDRESS is set above as a plain var — override via secret if you ever rotate wallets)
+#
+# Deploy:
+#   cd worker/
+#   npx wrangler deploy
+#
+# After deploy, copy the *.workers.dev URL into web/upgrade.html (VERIFY_URL)
+# and extension/popup.js (worker-backed verification call, when wired).

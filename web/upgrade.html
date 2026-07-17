@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unlock PolyParlay Pro</title>
+    <meta name="description" content="Unlock PolyParlay Pro. 30 days for 14.99 USDC, or 365 days for 99 USDC. Pay on Polygon. No subscription. No payment processor." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f5f1e8;
+        --bg-2: #fdfcf7;
+        --ink: #0a0c14;
+        --ink-2: #1f2937;
+        --muted: #6b6f7a;
+        --accent: #4f46e5;
+        --amber: #fbbf24;
+        --green: #16a34a;
+        --red: #dc2626;
+        --shadow-md: 4px 4px 0 var(--ink);
+        --shadow-sm: 3px 3px 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: var(--ink);
+        background-color: var(--bg);
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(10, 12, 20, 0.08) 1px, transparent 0);
+        background-size: 22px 22px;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+      /* === TICKER === */
+      .ticker {
+        background: var(--ink);
+        color: var(--bg);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; font-weight: 500;
+        letter-spacing: 1.6px; text-transform: uppercase;
+        padding: 9px 0;
+        white-space: nowrap; overflow: hidden;
+        border-bottom: 1.5px solid var(--ink);
+      }
+      .ticker-inner { display: inline-block; animation: scroll 42s linear infinite; padding-left: 100%; }
+      .ticker-inner span { margin: 0 28px; }
+      .ticker-inner .live::before {
+        content: '●'; color: var(--green); margin-right: 8px; text-shadow: 0 0 6px var(--green);
+      }
+      .ticker-inner .hi { color: var(--amber); }
+      .ticker-inner .acc { color: #a5b4fc; }
+      @keyframes scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+      }
+
+      /* === NAV === */
+      .nav {
+        max-width: 880px; margin: 0 auto;
+        padding: 22px 24px;
+        display: flex; justify-content: space-between; align-items: center;
+      }
+      .brand {
+        display: flex; align-items: center; gap: 12px;
+        font-weight: 800; color: var(--ink); text-decoration: none;
+        font-size: 17px; letter-spacing: -0.01em;
+      }
+      .brand-mark {
+        width: 40px; height: 40px;
+        border-radius: 8px;
+        background: var(--ink);
+        border: 1.5px solid var(--ink);
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0 5px;
+        font-weight: 900; font-size: 22px; line-height: 1;
+        letter-spacing: -2px;
+        box-shadow: var(--shadow-sm);
+      }
+      .brand-mark .p1 { color: var(--accent); }
+      .brand-mark .p2 { color: var(--amber); }
+      .nav-back {
+        color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 500;
+        font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;
+      }
+      .nav-back:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+      /* === MAIN === */
+      .wrap { max-width: 880px; margin: 0 auto; padding: 40px 24px 100px; }
+
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 2px; text-transform: uppercase;
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        padding: 6px 12px;
+        border-radius: 6px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 22px;
+      }
+      .eyebrow .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--amber);
+      }
+
+      h1 {
+        font-size: clamp(36px, 5vw, 56px);
+        line-height: 1.02;
+        margin: 0 0 18px;
+        font-weight: 900;
+        letter-spacing: -0.035em;
+      }
+      h1 .accent { color: var(--accent); }
+      h1 .amber  { color: #b45309; }
+      .lede {
+        font-size: 17px; line-height: 1.55;
+        color: var(--ink-2);
+        max-width: 660px;
+        margin: 0 0 38px;
+      }
+      .lede strong { color: var(--ink); font-weight: 700; }
+
+      .card {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 12px;
+        padding: 28px;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow-md);
+      }
+      .card h2 {
+        margin: 0 0 18px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      /* === STACKING-DAYS BANNER =========================================== */
+      .stack-banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        background: var(--bg-2);
+        border: 1.5px dashed var(--ink);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        box-shadow: 2px 2px 0 var(--accent);
+      }
+      .stack-icon {
+        font-size: 22px;
+        line-height: 1;
+        color: var(--accent);
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .stack-body {
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--ink-2);
+      }
+      .stack-body strong { color: var(--ink); font-weight: 800; display: block; margin-bottom: 2px; }
+
+      /* === TIER PICKER ===================================================
+         Two side-by-side tier cards. 30d cheap-try-it tier (default),
+         365d power-tier with "best value" flag. Each has its own one-click
+         wallet-pay button. */
+      .tier-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      @media (max-width: 600px) {
+        .tier-grid { grid-template-columns: 1fr; }
+      }
+      .tier {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 12px;
+        padding: 24px 22px;
+        position: relative;
+        display: flex; flex-direction: column;
+        box-shadow: var(--shadow-md);
+      }
+      .tier.dark { background: var(--ink); color: var(--bg); box-shadow: 5px 5px 0 var(--amber); }
+      .tier.dark .tier-name { color: var(--amber); }
+      .tier.dark .tier-price { color: var(--bg); }
+      .tier.dark .tier-unit  { color: #d1d5db; }
+      .tier.dark .tier-eq    { color: #d1d5db; }
+      .tier.dark .tier-meta  { color: #e5e7eb; }
+      .tier.dark .tier-meta strong { color: var(--amber); }
+      .tier-flag {
+        position: absolute;
+        top: -11px; right: 18px;
+        background: var(--amber);
+        color: var(--ink);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px; font-weight: 800;
+        letter-spacing: 1.6px;
+        padding: 4px 10px;
+        border: 1.5px solid var(--ink);
+        border-radius: 5px;
+        box-shadow: 2px 2px 0 var(--ink);
+      }
+      .tier-name {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 12px;
+      }
+      .tier-price-row {
+        display: flex; align-items: baseline; gap: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 4px;
+      }
+      .tier-price {
+        font-size: clamp(40px, 6vw, 56px);
+        font-weight: 900; line-height: 1;
+        letter-spacing: -0.04em;
+        color: var(--ink);
+      }
+      .tier-unit { font-size: 13px; color: var(--muted); font-weight: 500; }
+      .tier-eq { font-size: 12px; color: var(--muted); margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; }
+      .tier-meta {
+        font-size: 13.5px; line-height: 1.55;
+        color: var(--ink-2);
+        margin: 0 0 18px;
+      }
+      .tier-meta strong { color: var(--ink); font-weight: 700; }
+      .tier-btn {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--amber);
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+        border-radius: 9px;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: -0.005em;
+        cursor: pointer;
+        box-shadow: 4px 4px 0 var(--ink);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        margin-top: auto;
+      }
+      .tier.dark .tier-btn { box-shadow: 4px 4px 0 var(--bg); }
+      .tier-btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+      .tier.dark .tier-btn:hover { box-shadow: 5px 5px 0 var(--bg); }
+      .tier-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+      .tier.dark .tier-btn:active { box-shadow: 1px 1px 0 var(--bg); }
+      .tier-btn:disabled { background: #e7e5e0; color: var(--muted); cursor: not-allowed; transform: none; }
+      .tier-btn .arrow { font-size: 18px; }
+
+      /* === STEPS === */
+      .step {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 14px;
+        padding: 14px 0;
+        border-top: 1px dashed rgba(10, 12, 20, 0.18);
+      }
+      .step:first-of-type { border-top: 0; padding-top: 4px; }
+      .step:last-of-type { padding-bottom: 4px; }
+      .step-num {
+        width: 32px; height: 32px;
+        background: var(--ink);
+        color: var(--bg);
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800; font-size: 12px;
+        border-radius: 7px;
+        display: inline-flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      .step-body { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+      .step-body strong { color: var(--ink); font-weight: 700; }
+      .step-body code {
+        display: inline-block;
+        padding: 3px 8px;
+        background: var(--bg);
+        border: 1.5px solid var(--ink);
+        border-radius: 5px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .addr-box {
+        margin-top: 12px;
+        padding: 16px;
+        background: var(--ink);
+        color: var(--bg);
+        border: 1.5px solid var(--ink);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        box-shadow: var(--shadow-sm);
+      }
+      .addr-box .addr {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        word-break: break-all;
+        font-weight: 600;
+      }
+      button.copy {
+        background: var(--amber);
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+        padding: 8px 14px;
+        border-radius: 7px;
+        font-weight: 800;
+        font-size: 12px;
+        cursor: pointer;
+        flex-shrink: 0;
+        font-family: inherit;
+        box-shadow: 2px 2px 0 var(--bg);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        letter-spacing: 0.3px;
+      }
+      button.copy:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--bg); }
+      button.copy:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--bg); }
+
+      /* === VERIFY FORM === */
+      .verify-form { display: grid; gap: 12px; }
+      .verify-form input {
+        width: 100%;
+        background: var(--bg);
+        border: 1.5px solid var(--ink);
+        color: var(--ink);
+        padding: 14px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: 'JetBrains Mono', monospace;
+        outline: none;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+      }
+      .verify-form input::placeholder { color: var(--muted); }
+      .verify-form input:focus {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 var(--accent);
+        border-color: var(--accent);
+      }
+      .verify-form button {
+        background: var(--accent);
+        color: white;
+        border: 1.5px solid var(--ink);
+        padding: 14px 22px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 15px;
+        cursor: pointer;
+        font-family: inherit;
+        box-shadow: var(--shadow-md);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        letter-spacing: 0.2px;
+      }
+      .verify-form button:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+      .verify-form button:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+      .verify-form button:disabled {
+        background: var(--muted);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: var(--shadow-md);
+      }
+      .verify-form button:disabled:hover { transform: none; box-shadow: var(--shadow-md); }
+
+      #verifyStatus {
+        margin-top: 12px;
+        padding: 14px 16px;
+        border-radius: 8px;
+        border: 1.5px solid var(--ink);
+        font-size: 14px; line-height: 1.55;
+        display: none;
+      }
+      #verifyStatus.ok {
+        display: block;
+        background: #dcfce7;
+        color: #14532d;
+        box-shadow: var(--shadow-sm);
+      }
+      #verifyStatus.err {
+        display: block;
+        background: #fee2e2;
+        color: #7f1d1d;
+        box-shadow: var(--shadow-sm);
+      }
+      #verifyStatus strong { color: inherit; font-weight: 800; }
+
+      /* === VALUE-justification card === */
+      .value-card { background: var(--bg); }
+      .value-card h2 { color: var(--amber); }
+      .value-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .vs {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 9px;
+        padding: 16px 14px;
+        box-shadow: 3px 3px 0 var(--amber);
+      }
+      .vs-num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: clamp(26px, 3.4vw, 34px);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin-bottom: 6px;
+        line-height: 1;
+      }
+      .vs-lbl {
+        font-size: 12px;
+        color: var(--ink-2);
+        line-height: 1.4;
+      }
+      .value-foot {
+        font-size: 14px;
+        color: var(--ink-2);
+        line-height: 1.55;
+        margin: 0 0 8px;
+      }
+      .value-foot strong { color: var(--ink); font-weight: 800; }
+      .value-foot-small { font-size: 12px; color: var(--muted); margin-top: 4px; }
+      @media (max-width: 600px) {
+        .value-stats { grid-template-columns: 1fr; }
+      }
+
+      /* === Shared status box for both tier-pay flows === */
+      .pay-status {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--ink);
+        font-size: 13.5px;
+        line-height: 1.5;
+        display: none;
+      }
+      .pay-status.info { display: block; background: #e0e7ff; color: #312e81; box-shadow: 2px 2px 0 var(--ink); }
+      .pay-status.ok   { display: block; background: #dcfce7; color: #14532d; box-shadow: 2px 2px 0 var(--ink); }
+      .pay-status.err  { display: block; background: #fee2e2; color: #7f1d1d; box-shadow: 2px 2px 0 var(--ink); }
+      .pay-status .tx-link { display: inline-block; margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; word-break: break-all; }
+      .pay-status .tx-link a { color: inherit; text-decoration: underline; }
+
+      /* === FOOTER === */
+      footer {
+        text-align: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-top: 38px;
+        padding-top: 24px;
+        border-top: 1.5px solid var(--ink);
+      }
+      footer a { color: var(--ink); text-decoration: none; font-weight: 600; }
+      footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+      @media (max-width: 600px) {
+        .wrap { padding: 28px 18px 60px; }
+        .card { padding: 22px 20px; }
+        .addr-box { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- TICKER -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-inner">
+        <span class="live">LIVE</span>
+        <span>POLYPARLAY V1.0</span>
+        <span class="hi">$14.99 / 30 DAYS · TRY IT</span>
+        <span class="acc">OR $99 / 365 DAYS · 45% OFF</span>
+        <span>ON-CHAIN VERIFIED · POLYGON USDC</span>
+        <span class="hi">NO PAYMENT PROCESSOR · NO SUBSCRIPTION</span>
+        <span>USDC.e OR NATIVE USDC ACCEPTED</span>
+        <!-- duplicated for continuous loop -->
+        <span class="live">LIVE</span>
+        <span>POLYPARLAY V1.0</span>
+        <span class="hi">$14.99 / 30 DAYS · TRY IT</span>
+        <span class="acc">OR $99 / 365 DAYS · 45% OFF</span>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="brand" href="/">
+        <span class="brand-mark"><span class="p1">P</span><span class="p2">P</span></span>
+        PolyParlay
+      </a>
+      <a class="nav-back" href="/">← BACK TO HOME</a>
+    </nav>
+
+    <div class="wrap">
+
+      <div class="eyebrow"><span class="dot"></span> Upgrade to Pro</div>
+      <h1>Unlock <span class="accent">Pro.</span><br/>Two ways to <span class="amber">pay.</span></h1>
+      <p class="lede">
+        Send USDC on <strong>Polygon</strong> to unlock Pro. Try it for <strong>30 days at $14.99</strong>,
+        or commit to the <strong>annual pass at $99</strong> ($8.25/mo — 45% off the monthly rate).
+        The extension verifies your payment on-chain — <strong>no payment processor, no account, no auto-renew</strong>.
+      </p>
+
+      <!-- ============================================================
+           STACKING-DAYS BANNER — economic equivalent of a pro-rated
+           upgrade discount. If a user already has an active pass and
+           pays for another tier (typically monthly → annual), the
+           worker stacks the new days on top of their current expiry
+           instead of restarting from now. So nobody ever loses paid days.
+           ============================================================ -->
+      <div class="stack-banner">
+        <span class="stack-icon">↺</span>
+        <div class="stack-body">
+          <strong>Already on a pass? Your remaining days stack.</strong>
+          Pay for annual mid-monthly and your unused days slide on top — same as a pro-rated discount,
+          handled automatically on-chain. No wasted USDC.
+        </div>
+      </div>
+
+      <!-- ============================================================
+           TIER PICKER — two side-by-side cards with their own pay flow
+           ============================================================ -->
+      <div class="tier-grid">
+        <div class="tier" id="tier-30d">
+          <p class="tier-name">// 30-DAY PASS</p>
+          <div class="tier-price-row">
+            <span class="tier-price">4.99</span>
+            <span class="tier-unit">USDC</span>
+          </div>
+          <div class="tier-eq">$14.99 / month · pay once · valid 30 days</div>
+          <p class="tier-meta">
+            Lowest-friction way to try Pro on a real parlay or two.
+            Renew whenever you want — no subscription, no auto-charge.
+          </p>
+          <button type="button" class="tier-btn" data-tier="30d">
+            <span class="arrow">⚡</span>
+            <span>Pay 14.99 USDC</span>
+          </button>
+        </div>
+
+        <div class="tier dark" id="tier-365d">
+          <div class="tier-flag">BEST VALUE · 45% OFF</div>
+          <p class="tier-name">// 365-DAY PASS</p>
+          <div class="tier-price-row">
+            <span class="tier-price">39</span>
+            <span class="tier-unit">USDC</span>
+          </div>
+          <div class="tier-eq">≈ $8.25 / month · pay once · valid 365 days</div>
+          <p class="tier-meta">
+            For active bettors. <strong>Pays for itself in ~3 rebalanced parlays.</strong>
+            Same on-chain mechanism — set it and forget it for a year.
+          </p>
+          <button type="button" class="tier-btn" data-tier="365d">
+            <span class="arrow">⚡</span>
+            <span>Pay 99 USDC</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="payStatus" class="pay-status"></div>
+
+      <!-- ============================================================
+           VALUE JUSTIFICATION — does Pro actually pay for itself?
+           ============================================================ -->
+      <section class="card value-card">
+        <h2>// THE MATH — DOES PRO PAY FOR ITSELF?</h2>
+        <div class="value-stats">
+          <div class="vs">
+            <div class="vs-num">+21pp</div>
+            <div class="vs-lbl">Average win-rate lift when Improve Odds flips a weak leg</div>
+          </div>
+          <div class="vs">
+            <div class="vs-num">$4.80</div>
+            <div class="vs-lbl">Expected-value gain per rebalanced parlay (at $50 stake)</div>
+          </div>
+          <div class="vs">
+            <div class="vs-num">1 / mo</div>
+            <div class="vs-lbl">Rebalances needed to break even on the $14.99/mo cost</div>
+          </div>
+        </div>
+        <p class="value-foot">
+          Math: a single rebalanced parlay covers a month of access.
+          At <strong>$99/year (~$8.25/mo)</strong>, less than one rebalanced parlay per month breaks even.
+          If you bet bigger or more often, the ratio gets stupid quickly.
+        </p>
+        <p class="value-foot value-foot-small">
+          (Numbers above are model-based — actual results vary by your slip selection.
+          PolyParlay shows you the sim win-rate distribution so you can verify.)
+        </p>
+      </section>
+
+      <!-- ============================================================
+           HOW TO PAY (MANUAL PATH)
+           ============================================================ -->
+      <section class="card">
+        <h2>// MANUAL PAY — IF YOUR WALLET ISN'T A BROWSER EXTENSION</h2>
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-body">
+            <strong>Open your wallet</strong> and switch to the <strong>Polygon network</strong>.
+            Make sure you hold at least <strong>14.99 USDC</strong> (or 39 for the annual pass).<br />
+            USDC (native, Circle): <code>0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359</code><br />
+            USDC.e (bridged): <code>0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174</code>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-body">
+            <strong>Send 14.99 USDC</strong> (30-day pass) or <strong>99 USDC</strong> (365-day pass) to this address:
+            <div class="addr-box">
+              <span class="addr" id="paymentAddr">0x9548B8E9554a1968843B3C380431b10996247c88</span>
+              <button class="copy" id="copyAddr">Copy</button>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-body">
+            <strong>Wait 30–60 seconds</strong> for Polygonscan to index your transaction, then verify
+            below using the wallet you paid <em>from</em>. The verifier finds your transfer on-chain
+            and unlocks Pro in your extension.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           VERIFY FORM
+           ============================================================ -->
+      <section class="card">
+        <h2>// VERIFY PAYMENT</h2>
+        <form class="verify-form" id="verifyForm">
+          <input
+            type="text"
+            id="walletInput"
+            placeholder="0x… wallet  OR  POLY-XXX code"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <button type="submit" id="verifyBtn">Verify payment &amp; unlock Pro →</button>
+        </form>
+        <div id="verifyStatus"></div>
+      </section>
+
+      <footer>
+        ON-CHAIN VERIFICATION VIA POLYGONSCAN · NO THIRD-PARTY PAYMENT PROCESSOR<br/>
+        <a href="/privacy">PRIVACY</a> · <a href="/">HOME</a> · <a href="https://polymarket.com" target="_blank" rel="noopener">POLYMARKET ↗</a>
+      </footer>
+    </div>
+
+    <script>
+      const PAYMENT_ADDRESS = '0x9548B8E9554a1968843B3C380431b10996247c88';
+      const VERIFY_URL = 'https://polyparlay-verify.z-lew87.workers.dev/verify';
+      const USDC_POLYGON = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
+      const POLYGON_CHAIN_ID = '0x89'; // 137
+      const EXTENSION_ID = 'YOUR_EXTENSION_ID'; // replaced after CWS publish
+
+      // Tier table — mirrors worker/verify.js. Raw values are USDC amounts at
+      // 6 decimals: 14.99 USDC = 4_990_000, 99 USDC = 39_000_000.
+      const TIERS = {
+        '30d':  { rawAmount: '14990000',  label: '30-day pass',  days: 30  },
+        '365d': { rawAmount: '99000000', label: '365-day pass', days: 365 }
+      };
+
+      document.getElementById('paymentAddr').textContent = PAYMENT_ADDRESS;
+
+      document.getElementById('copyAddr').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(PAYMENT_ADDRESS);
+          const btn = document.getElementById('copyAddr');
+          const t = btn.textContent;
+          btn.textContent = 'Copied ✓';
+          setTimeout(() => (btn.textContent = t), 1400);
+        } catch {
+          prompt('Copy this address:', PAYMENT_ADDRESS);
+        }
+      });
+
+      // === SHARED STATUS BOX ===============================================
+      const payStatus = document.getElementById('payStatus');
+      function setPayStatus(cls, html) {
+        payStatus.className = 'pay-status ' + cls;
+        payStatus.innerHTML = html;
+        // Scroll into view so user sees the prompt without hunting
+        payStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      function clearPayStatus() {
+        payStatus.className = 'pay-status';
+        payStatus.innerHTML = '';
+      }
+
+      // === EIP-1193 ONE-CLICK PAY ===========================================
+      function encodeTransferData(toAddress, amount) {
+        const selector = 'a9059cbb';
+        const padAddr = toAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+        const padAmt = BigInt(amount).toString(16).padStart(64, '0');
+        return '0x' + selector + padAddr + padAmt;
+      }
+
+      async function payWithWallet(tierKey) {
+        const tier = TIERS[tierKey];
+        if (!tier) return;
+
+        if (!window.ethereum) {
+          setPayStatus('err',
+            'No browser wallet detected. Install MetaMask / Coinbase Wallet / Rabby / Brave Wallet, then refresh. ' +
+            'Or use the manual flow below — send ' + (tier.days === 30 ? '4.99' : '39') + ' USDC to the address shown, then verify.');
+          return;
+        }
+
+        // Disable all tier buttons during the flow
+        const allBtns = document.querySelectorAll('.tier-btn');
+        allBtns.forEach((b) => (b.disabled = true));
+        setPayStatus('info', 'Connecting your wallet for the ' + tier.label + '…');
+
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          if (!accounts || !accounts.length) throw new Error('No account returned from wallet');
+          const fromAddr = accounts[0];
+
+          let chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          if (chainId !== POLYGON_CHAIN_ID) {
+            setPayStatus('info', 'Switching to Polygon…');
+            try {
+              await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: POLYGON_CHAIN_ID }]
+              });
+            } catch (switchErr) {
+              if (switchErr && switchErr.code === 4902) {
+                await window.ethereum.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [{
+                    chainId: POLYGON_CHAIN_ID,
+                    chainName: 'Polygon',
+                    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+                    rpcUrls: ['https://polygon-rpc.com'],
+                    blockExplorerUrls: ['https://polygonscan.com']
+                  }]
+                });
+              } else {
+                throw switchErr;
+              }
+            }
+            chainId = await window.ethereum.request({ method: 'eth_chainId' });
+            if (chainId !== POLYGON_CHAIN_ID) throw new Error('Failed to switch to Polygon');
+          }
+
+          setPayStatus('info', 'Confirm the transaction in your wallet (' + tier.label + ')…');
+          const data = encodeTransferData(PAYMENT_ADDRESS, tier.rawAmount);
+          const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+              from: fromAddr,
+              to: USDC_POLYGON,
+              data,
+              value: '0x0'
+            }]
+          });
+
+          setPayStatus('info',
+            'Transaction sent. Waiting for Polygon to confirm + Polygonscan to index (~30–60s)…' +
+            '<div class="tx-link">tx: <a href="https://polygonscan.com/tx/' + txHash + '" target="_blank" rel="noopener">' + txHash + '</a></div>'
+          );
+
+          const start = Date.now();
+          let verified = null;
+          while (Date.now() - start < 120000) {
+            await new Promise((r) => setTimeout(r, 8000));
+            try {
+              const r = await fetch(VERIFY_URL + '?wallet=' + encodeURIComponent(fromAddr));
+              if (r.ok) {
+                const d = await r.json();
+                if (d.ok && d.pro) { verified = d; break; }
+              }
+            } catch {}
+            setPayStatus('info',
+              'Still waiting for verification… (~' + Math.round((Date.now() - start) / 1000) + 's elapsed)' +
+              '<div class="tx-link">tx: <a href="https://polygonscan.com/tx/' + txHash + '" target="_blank" rel="noopener">' + txHash + '</a></div>'
+            );
+          }
+
+          if (!verified) {
+            throw new Error('Verification didn\'t complete after 2 minutes. Your tx is on-chain — paste the wallet address into the form below to manually verify.');
+          }
+
+          const expires = new Date(verified.expires * 1000).toLocaleDateString();
+          const tierLabel = verified.tier === '30d' ? '30-day pass' : (verified.tier === '365d' ? '365-day pass' : 'Pro');
+          setPayStatus('ok',
+            '<strong>✓ Payment verified.</strong> ' + tierLabel + ' active until <strong>' + expires + '</strong>. ' +
+            'Open the PolyParlay extension — Pro features unlocked.' +
+            '<div class="tx-link">tx: <a href="https://polygonscan.com/tx/' + txHash + '" target="_blank" rel="noopener">' + txHash + '</a></div>'
+          );
+
+          try {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+              chrome.runtime.sendMessage(EXTENSION_ID, {
+                type: 'proVerified',
+                wallet: fromAddr,
+                expires: verified.expires,
+                paidAt: verified.paidAt,
+                tier: verified.tier
+              });
+            }
+          } catch {}
+        } catch (err) {
+          const msg = err && (err.message || err.toString()) || 'Unknown error';
+          if (/User (?:denied|rejected)/i.test(msg) || (err && err.code === 4001)) {
+            setPayStatus('err', 'Transaction cancelled. Click the button again whenever you\'re ready.');
+          } else {
+            setPayStatus('err', 'Payment failed: ' + msg);
+          }
+        } finally {
+          allBtns.forEach((b) => (b.disabled = false));
+        }
+      }
+
+      // Wire both tier buttons to the same handler, differentiated by data-tier
+      document.querySelectorAll('.tier-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const t = btn.getAttribute('data-tier');
+          payWithWallet(t);
+        });
+      });
+
+      // === MANUAL-VERIFY FORM ==============================================
+      document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const wallet = document.getElementById('walletInput').value.trim();
+        const status = document.getElementById('verifyStatus');
+        const btn = document.getElementById('verifyBtn');
+        status.className = '';
+        status.style.display = 'none';
+
+        // Accept either a 0x wallet address OR a POLY-XXX comp code.
+        // The worker normalizes either form on the back end.
+        if (!/^(0x[a-f0-9]{40}|POLY-\d{3})$/i.test(wallet)) {
+          status.className = 'err';
+          status.textContent = "That doesn't look like a valid wallet address or POLY code. Either 0x… (42 chars) or POLY-XXX.";
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Checking the blockchain…';
+        try {
+          const r = await fetch(VERIFY_URL + '?wallet=' + encodeURIComponent(wallet));
+          if (!r.ok) throw new Error('Verifier returned ' + r.status);
+          const data = await r.json();
+          if (data.ok && data.pro) {
+            const expires = new Date(data.expires * 1000).toLocaleDateString();
+            const tierLabel = data.tier === '30d' ? '30-day pass' : (data.tier === '365d' ? '365-day pass' : 'Pro');
+            status.className = 'ok';
+            status.innerHTML =
+              '<strong>✓ Payment verified.</strong> ' + tierLabel + ' active until <strong>' + expires + '</strong>. ' +
+              'Open the extension — your Pro features are unlocked.';
+            try {
+              if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage(
+                  EXTENSION_ID,
+                  { type: 'proVerified', wallet, expires: data.expires, paidAt: data.paidAt, tier: data.tier }
+                );
+              }
+            } catch {}
+          } else {
+            status.className = 'err';
+            status.textContent =
+              'No qualifying payment found from this wallet. Send 14.99 USDC (30-day) or 99 USDC (365-day) to the address above, ' +
+              'wait ~60 seconds for Polygonscan to index it, then verify again.';
+          }
+        } catch (err) {
+          status.className = 'err';
+          status.textContent = 'Verification failed: ' + (err.message || err) + '. The Polygonscan API may be rate-limited — try again in a few seconds.';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Verify payment & unlock Pro →';
+        }
+      });
+    </script>
+  </body>
+</html>

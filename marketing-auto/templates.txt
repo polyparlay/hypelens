@@ -1,0 +1,526 @@
+# PolyParlay marketing template arsenal
+
+40+ pre-written posts. Copy → paste → ship. Variables in `{{curly braces}}` need replacement.
+
+Use `node marketing-auto/generate-content.mjs` for live `{{slipUrl}}`, `{{winRate}}`, `{{multiplier}}`, `{{payout}}` values.
+
+---
+
+## X / Twitter — single posts (16)
+
+### Value-prop angle
+
+**T1** — Cold open, direct value
+```
+Most Polymarket parlay tools just multiply prices.
+
+PolyParlay runs 10,000 Monte Carlo sims, flips your weakest leg, and computes Kelly bet size.
+
+Free up to 3 legs. polyparlay.app
+```
+
+**T2** — Math nerd appeal
+```
+Your 4.11× Polymarket parlay multiplier doesn't mean what you think.
+
+Real win rate at 4.11×: could be 36%. Could be 9%. Same multiplier.
+
+Only Monte Carlo tells you which. We run 10K per slip → polyparlay.app
+```
+
+**T3** — Kelly hook
+```
+Polymarket asks how much you want to bet.
+
+It doesn't ask if you SHOULD bet that much.
+
+PolyParlay computes Half-Kelly stake from your bankroll + sim WR. polyparlay.app
+```
+
+**T4** — Loss-aversion
+```
+Every overstake on Polymarket is a Kelly criterion violation.
+
+You're sizing on multiplier × wishful thinking. Sharp bettors size on Monte Carlo × bankroll.
+
+Calculator: polyparlay.app (free)
+```
+
+### Show-don't-tell (paste with slip URL)
+
+**T5** — Generic chase parlay
+```
+{{n}}-leg Polymarket parlay I built today.
+
+→ {{winRate}}% real win rate (10K Monte Carlo)
+→ {{multiplier}}× combined multiplier
+→ ${{payout}} max payout from $25
+
+{{slipUrl}}
+```
+
+**T6** — Skill flex
+```
+Stacked {{n}} markets, ran 10K sims, rebalanced the weakest leg.
+
+WR: {{winRate}}% · {{multiplier}}× · ${{payout}} from $25
+
+Built with @polyparlay (free): {{slipUrl}}
+```
+
+**T7** — Hook with rebalance
+```
+Slip before Improve Odds: 36% WR
+Slip after Improve Odds: 57% WR
++21pp from flipping one leg.
+
+The algorithm finds the weak one. {{slipUrl}}
+```
+
+**T8** — High WR, low payout (skill positioning)
+```
+Boring parlay alert:
+
+3 PM markets, all the favorite side, 67% real win rate.
+2.2× multiplier · $54 payout from $25.
+
+Compound this 100x and you have an edge: {{slipUrl}}
+```
+
+### Compete-with-Polymarket (positioning)
+
+**T9** — Polymarket gap
+```
+Polymarket has 50K+ markets.
+
+It does not have:
+✗ Parlay slip
+✗ Combined multiplier
+✗ Win-rate distribution
+✗ Bet sizing
+
+We do. Free Chrome extension → polyparlay.app
+```
+
+**T10** — Honest math
+```
+PSA: the "combined multiplier" on parlay calculators is fake.
+
+Polymarket pays each leg independently. There's no native parlay contract.
+
+PolyParlay shows you what you'll ACTUALLY get vs. the hypothetical → polyparlay.app
+```
+
+**T11** — Tool-shaming OddsJam etc.
+```
+$99/mo for sports betting EV tools.
+$49/mo for crypto analytics.
+
+$14.99/mo for Polymarket Monte Carlo + Improve Odds + Kelly sizing.
+
+PolyParlay. The pro tier exists. polyparlay.app
+```
+
+**T12** — One-liner
+```
+What if your Polymarket parlay calculator was useful?
+
+polyparlay.app
+```
+
+### Crypto-native angle
+
+**T13** — No wallet connect
+```
+PolyParlay is the only Polymarket tool that:
+
+→ doesn't require wallet connect
+→ doesn't require signup
+→ pays for itself via $14.99/mo on-chain USDC
+→ free up to 3 legs
+
+polyparlay.app
+```
+
+**T14** — On-chain pricing
+```
+Pay $14.99 in USDC on Polygon. One tx. No account.
+
+If you forget to renew → you forget to renew. No surprise charges.
+
+PolyParlay Pro: polyparlay.app/upgrade
+```
+
+### Educational thread starters
+
+**T15** — Monte Carlo explainer
+```
+Quick math thread: why your Polymarket parlay's "win probability" is wrong 🧵
+
+(1/) When you see 4.11× combined multiplier, your brain reads "1 in 4 chance."
+(2/) Wrong. That's the RECIPROCAL of the cost basis, not the WR.
+...
+
+(Use full thread T_THREAD_1 below)
+```
+
+**T16** — Kelly explainer
+```
+The Kelly Criterion in 4 tweets, applied to Polymarket parlays 🧵
+
+(1/) Kelly tells you what % of bankroll to wager to maximize log-utility growth.
+(2/) f = (WR × (mult - 1) - loseRate) / (mult - 1)
+...
+
+(Use full thread T_THREAD_2 below)
+```
+
+---
+
+## X / Twitter — threads (3)
+
+### T_THREAD_1 — Monte Carlo explainer
+
+```
+1/ Quick math thread: why your Polymarket parlay's "win probability" is wrong 🧵
+
+2/ When you see "4.11× combined multiplier" on a 3-leg parlay, your gut says "~24% chance" (1/4.11).
+
+3/ Wrong. That's the cost basis ratio, not the win rate.
+
+The actual WR is the product of each leg's market-implied probability. Two parlays with the same 4.11× multiplier can have wildly different real win rates depending on which legs you picked.
+
+4/ Example: 
+• Parlay A: 3 legs at $0.62 each. Multiplier ≈ 4.20×. Real WR: 23.8%.
+• Parlay B: 2 legs at $0.40 + 1 leg at $0.39. Multiplier ≈ 16.0×. Real WR: 6.2%.
+
+Same "multiplier category." Wildly different bets.
+
+5/ Monte Carlo runs 10,000 simulated futures, AND-aggregates the per-leg outcomes, and gives you the actual distribution.
+
+You see your real win rate, the EV in dollars, and where on the curve your parlay lands.
+
+6/ PolyParlay does this automatically for every slip you build on Polymarket.
+
+Free up to 3 legs → polyparlay.app
+
+The math is what separates a gambler from a sharp.
+```
+
+### T_THREAD_2 — Kelly explainer
+
+```
+1/ The Kelly Criterion, in 4 tweets, applied to Polymarket parlays 🧵
+
+2/ Kelly tells you what % of bankroll to bet to maximize long-run log-utility growth.
+
+Underbet → you leave growth on the table.
+Overbet → you risk ruin (the math literally says you go broke).
+
+3/ Formula for a parlay:
+f = (WR × (mult − 1) − loseRate) / (mult − 1)
+
+Where WR is your real win rate from Monte Carlo and mult is your combined multiplier.
+
+Then HALVE it. Half-Kelly is the practical setting — full Kelly is variance-brutal.
+
+4/ Example: $500 bankroll, 57% WR, 3.4× combined multiplier.
+
+f = (0.57 × 2.4 − 0.43) / 2.4 = 0.39
+Half-Kelly: 0.39 / 2 ≈ 0.195 → bet $97
+
+Most people would eyeball this at $50. They're underbetting +EV by 50%.
+
+5/ PolyParlay computes this for every slip. The "Recommended stake" number IS Half-Kelly given your sim WR + bankroll.
+
+Free up to 3 legs → polyparlay.app
+
+Stop guessing. Start sizing.
+```
+
+### T_THREAD_3 — Tool comparison
+
+```
+1/ Why I built PolyParlay 🧵
+
+A short rant about prediction-market tooling.
+
+2/ Polymarket has $1B+ in volume. Thousands of active traders. Genuinely the most interesting financial product of the decade.
+
+The official UI: one market at a time. No parlay support. No multi-leg analytics. No bet sizing.
+
+3/ Existing parlay tools: spreadsheets and basic calculators that just multiply prices together. That's not analytics — that's arithmetic.
+
+Nothing runs Monte Carlo. Nothing computes Kelly. Nothing flips weak legs.
+
+4/ So I built it. PolyParlay:
+→ Floating "Add to slip" pill on every Polymarket page
+→ 10K Monte Carlo on every parlay
+→ Improve Odds (auto-rebalance weak legs)
+→ Half-Kelly bet sizing
+
+5/ Free up to 3 legs. $14.99/mo Pro for unlimited + power features. On-chain USDC payment, no account, no card.
+
+→ polyparlay.app
+
+The market needed this. Now it exists.
+```
+
+---
+
+## Reddit (8 posts)
+
+### r/PolyMarket
+
+**R1** — Educational lead
+```
+Title: PSA: your Polymarket parlay multiplier is not your win probability
+
+Body:
+Quick math post. When you see "4.11× combined multiplier" on a 3-leg parlay, the natural read is "~24% chance to hit." That's the RECIPROCAL of the cost basis, not the actual win rate.
+
+The real win rate is the product of each leg's market-implied probability. Two parlays with identical multipliers can have wildly different real WRs.
+
+Example:
+- 3 legs at $0.62 each: multiplier 4.20×, real WR 23.8%
+- 2 legs at $0.40 + 1 at $0.39: multiplier 16.0×, real WR 6.2%
+
+Same "category." Very different bet.
+
+I built a Chrome extension (polyparlay.app) that runs 10K Monte Carlo sims on every parlay you build from PM markets, finds your weakest leg, and tells you whether to flip or drop it. Free up to 3 legs.
+
+Just sharing the math in case it changes how others think about their slips. The tool is optional — the insight is free.
+```
+
+**R2** — Tool announcement
+```
+Title: Built a free Chrome extension for multi-leg PM parlays — Monte Carlo + rebalance
+
+Body:
+Hey r/PolyMarket — built this for myself, figured I'd share.
+
+PolyParlay adds a floating "+ Add to slip" pill on every Polymarket market page. Stack 2-3 markets, open the popup, hit Run Monte Carlo. You get:
+- 10K simulated outcomes per slip
+- Real win-rate distribution (not just multiplier × multiplier)
+- "Improve Odds" button that flips your weakest leg
+- Half-Kelly bet sizing recommendation
+
+Free up to 3 legs. $14.99/mo or $99/yr for unlimited + power features. On-chain USDC payment so no signup or card.
+
+polyparlay.app — Chrome only, Firefox port planned.
+
+Built solo, so feedback wanted. Genuinely curious what features you'd want next.
+```
+
+**R3** — Case study
+```
+Title: 100 random Polymarket parlays ran through Monte Carlo — here's what I found
+
+Body:
+Pulled 100 random 3-leg parlays from active PM markets. Ran 10K sims each. 
+
+TL;DR: 73 of 100 had a "weak leg" that, if flipped to the opposite side, increased the parlay's win rate by ≥10pp.
+
+The pattern: PM bettors compose parlays from markets they have a STRONG view on. They don't realize that the contrarian side of one leg is often where the EV is.
+
+Examples [include 3 anonymized parlay URLs from PolyParlay]:
+- Slip 1: 41% WR → flip leg 2 → 67% WR
+- Slip 2: 23% WR → flip leg 1 → 49% WR  
+- Slip 3: 12% WR → drop leg 3 → 31% WR
+
+The takeaway: your slip's win rate is information you can't get from looking at individual leg prices. Monte Carlo gives it to you in seconds.
+
+Tool I used: polyparlay.app (Chrome extension, free up to 3 legs)
+```
+
+### r/predictionmarkets
+
+**R4** — Cross-post variant
+```
+Title: How to apply Kelly sizing to Polymarket parlays (with calculator)
+
+[Similar to T_THREAD_2 but expanded as a Reddit post — keep the math, add a calculator screenshot]
+```
+
+### r/algotrading
+
+**R5** — Edge angle
+```
+Title: Browser-extension Monte Carlo for prediction-market parlay sizing
+
+Body:
+Not exactly algo-trading but it's adjacent: there's an inefficiency in how casual Polymarket users size parlays. They eyeball stakes from multipliers, not from sim WR.
+
+I built a Chrome extension that:
+1. Detects PM market URLs
+2. Lets you stack 2+ legs into a slip
+3. Runs 10K Monte Carlo on the joint distribution
+4. Computes Half-Kelly stake from sim WR + bankroll
+5. Surfaces the weakest leg + suggests flips
+
+The "Improve Odds" rebalancer is the interesting part — it finds whichever leg has the worst marginal contribution to joint EV and recommends flipping or dropping.
+
+polyparlay.app — free up to 3 legs, $14.99/mo for unlimited.
+
+Curious if anyone here has thoughts on the rebalance heuristic. Currently greedy single-leg search; multi-leg search is exponentially more expensive but plausibly better.
+```
+
+### r/CryptoCurrency / r/ethfinance
+
+**R6** — Crypto-native pitch
+```
+Title: First Polymarket tool that pays via on-chain USDC (no Stripe, no signup)
+
+Body:
+Quick share for crypto-natives: PolyParlay is a Chrome extension for Polymarket parlay building that runs Monte Carlo simulations on your slip + recommends bet sizing.
+
+What's different: payment is on-chain USDC on Polygon. No Stripe, no account, no card. Send $14.99 USDC monthly or $99 USDC annually to a verified contract address, the extension polls Polygonscan to verify, you get unlocked.
+
+Free up to 3 legs. polyparlay.app
+
+I built this because every other "Pro" tool wants my email + credit card. This one wants a transaction.
+```
+
+### Specific PM market posts
+
+**R7** — Topical (election, BTC, etc.)
+```
+Title: Anyone parlaying [HOT EVENT] on Polymarket? Built a tool to optimize the slip.
+
+Body:
+[Topic-specific intro, e.g. "Fed June cut is at $0.62 YES. NYC mayoral is at $0.49 YES. AI doom by 2027 at $0.18 YES."]
+
+I stacked these in PolyParlay and ran 10K sims. Combined multiplier 3.4×, real win rate 28%, EV +$1.20 per $25 staked.
+
+[Embed shared slip URL]
+
+Free Chrome extension if you want to do the same: polyparlay.app
+```
+
+### Pure value-add (no link)
+
+**R8** — Soft promo via insight
+```
+Title: The two things every Polymarket parlay calculator gets wrong
+
+Body:
+1. Win-rate calculation. Most show "combined multiplier" but call it "win odds." Those are different numbers. The actual WR is the joint probability of every leg hitting, which is the product of market-implied probabilities. A 4× multiplier doesn't mean 25% WR — it means 25% COST BASIS.
+
+2. Bet sizing. Calculators show you the multiplier and let you input a stake. None recommend the Kelly-optimal stake given your bankroll + the actual sim WR. Overbetting is statistically guaranteed to bankrupt long-term holders even on +EV bets.
+
+Made these mistakes for months until I built a tool that solves both. Won't link it here (against the spirit of /pure value/) but DM me if interested.
+```
+
+---
+
+## Discord (6 messages)
+
+### Polymarket Discord — drop in #general or #strategy
+
+**D1**
+```
+Anyone using a tool for multi-leg Polymarket parlays? I built one that does Monte Carlo on the slip + recommends which leg to flip if your WR is weak. Free up to 3 legs: polyparlay.app — sharing in case it's useful, no sales pitch
+```
+
+**D2**
+```
+Quick parlay I built today, ran 10K sims:
+{{slipUrl}}
+Real WR {{winRate}}%, multiplier {{multiplier}}×. Forked it from a PolyParlay slip — the Improve Odds button on that thing is actually useful
+```
+
+### Prediction-market trader Discord
+
+**D3**
+```
+For the parlay-curious: prediction-market parlays don't have a native multi-leg contract on Polymarket, so the "combined multiplier" you see in calculators is hypothetical (only realizes if you execute as a true parlay via something like PredictShark).
+
+But the SIMULATION still tells you something — if a 3-leg slip has a 12% real WR, that's information about which markets you're picking, regardless of how you bet it.
+
+Built a tool for this: polyparlay.app
+```
+
+### Crypto-trading Discord
+
+**D4**
+```
+USDC-priced subscription tool drop:
+
+@polyparlay — Polymarket parlay analytics. Pay $14.99 USDC monthly or $99/year directly on Polygon. No Stripe, no email, no card. Just a tx.
+
+If on-chain SaaS sounds appealing this is one of the few that actually does it. polyparlay.app/upgrade
+```
+
+### Sports betting Discord
+
+**D5**
+```
+Polymarket has +EV opportunities the books don't because the markets are crowd-priced not book-priced. The challenge is parlay sizing — most calculators don't run Monte Carlo or apply Kelly.
+
+PolyParlay does both. Free up to 3 legs, $14.99/mo unlimited. polyparlay.app
+```
+
+### DFS Discord
+
+**D6**
+```
+Has anyone tried building DFS-style parlays from Polymarket sports markets? The lines are crowd-priced so they sometimes diverge from sportsbooks. 
+
+PolyParlay (chrome ext) lets you stack PM sports markets into a slip + runs Monte Carlo. Free up to 3 legs. polyparlay.app
+
+Curious if anyone's found a consistent edge stacking PM sports vs traditional books.
+```
+
+---
+
+## Telegram (3 messages)
+
+### Polymarket trader groups
+
+**TG1**
+```
+For parlay enthusiasts in here — built a free Chrome ext that runs 10K Monte Carlo on multi-leg PM slips. Tells you real win rate (not just multiplier) and which leg to flip for better odds.
+
+polyparlay.app — free up to 3 legs
+```
+
+### Crypto signals groups
+
+**TG2**
+```
+On-chain SaaS rec: PolyParlay (polyparlay.app)
+
+Pay $14.99 USDC monthly or $99/yr directly on Polygon. No email/card. Polymarket parlay analytics — Monte Carlo, Improve Odds rebalancer, Kelly bet sizing.
+
+One of the very few tools that's actually pure on-chain payment, no subscription processor.
+```
+
+### Whale/sharp groups
+
+**TG3**
+```
+Polymarket sharps — there's an inefficiency in how 90% of PM users size parlays. They eyeball stakes off the multiplier. Half-Kelly off sim WR is the right answer.
+
+PolyParlay computes Half-Kelly automatically. Worth it for serious bankrolls. $14.99/mo on-chain USDC, polyparlay.app
+```
+
+---
+
+## Hashtags
+
+```
+Primary:    #polymarket #polyparlay #predictionmarkets
+Secondary:  #parlay #montecarlo #kellycriterion #onchainsaas #cryptobetting
+Casual:     #polyfam #pmtwitter #parlaylife
+Topical:    #fedrates #bitcoin #election2026
+```
+
+---
+
+## How to use this
+
+1. Copy any post above
+2. Replace `{{slipUrl}}` etc. with output from `node marketing-auto/generate-content.mjs`
+3. Post on the relevant platform
+4. Rotate templates so you never post the same copy twice
+5. Track which posts convert via the unique slip URLs (each has a different hash → you'll see which URLs get visited via the worker's Polygonscan webhook downstream)

@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- Icon C: Stylized Monte Carlo die. Symbol-based, no text, brutalist border. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 128px; height: 128px; background: #f5f1e8; }
+    .tile {
+      width: 128px; height: 128px;
+      background: #fbbf24;
+      border: 4px solid #0a0c14;
+      display: flex; align-items: center; justify-content: center;
+      padding: 18px;
+    }
+    .die {
+      width: 84px; height: 84px;
+      background: #fdfcf7;
+      border: 4px solid #0a0c14;
+      border-radius: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 3px;
+      padding: 9px;
+    }
+    .pip {
+      width: 12px; height: 12px;
+      background: #0a0c14;
+      border-radius: 50%;
+      align-self: center;
+      justify-self: center;
+    }
+    .pip.accent { background: #4f46e5; }
+  </style>
+</head>
+<body>
+  <div class="tile">
+    <div class="die">
+      <div class="pip"></div><div class="pip"></div>
+      <div class="pip accent"></div><div class="pip accent"></div>
+      <div class="pip"></div><div class="pip"></div>
+    </div>
+  </div>
+</body>
+</html>

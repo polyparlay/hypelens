@@ -1,0 +1,115 @@
+<!doctype html>
+<!-- CWS Screenshot 5 — Pricing + Pro tier breakdown. 1280×800. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PolyParlay — Pricing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_styles.css" />
+  <style>
+    body { width: 1280px; height: 800px; }
+    .frame { width: 1280px; height: 800px; padding: 60px 70px; display: flex; flex-direction: column; }
+    .head { text-align: center; margin-bottom: 40px; }
+    h1 { font-size: 60px; line-height: 1; font-weight: 900; letter-spacing: -0.04em; margin: 0 0 14px; }
+    h1 .amber { color: var(--amber-dk); }
+    h1 .accent { color: var(--accent); }
+    .sub { font-size: 18px; color: var(--ink-2); margin: 0; max-width: 760px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+    .sub strong { color: var(--ink); font-weight: 800; }
+
+    .tiers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; flex: 1; }
+    .tier { background: var(--bg-2); border: 2px solid var(--ink); border-radius: 14px; padding: 28px 26px; box-shadow: 5px 5px 0 var(--ink); display: flex; flex-direction: column; position: relative; }
+    .tier.dark { background: var(--ink); color: var(--bg); box-shadow: 6px 6px 0 var(--amber); }
+    .tier.dark .tier-name { color: var(--amber); }
+    .tier.dark .tier-price { color: var(--bg); }
+    .tier.dark .tier-unit { color: #d1d5db; }
+    .tier.dark .tier-eq { color: #d1d5db; }
+    .tier.dark ul li { color: #e5e7eb; border-color: rgba(255,255,255,0.12); }
+    .tier.dark ul li::before { color: var(--amber); }
+    .tier-flag { position: absolute; top: -14px; right: 20px; background: var(--amber); color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; letter-spacing: 1.6px; padding: 5px 11px; border: 1.5px solid var(--ink); border-radius: 5px; box-shadow: 2px 2px 0 var(--ink); }
+    .tier-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; letter-spacing: 1.8px; color: var(--accent); text-transform: uppercase; margin: 0 0 14px; }
+    .tier-price-row { display: flex; align-items: baseline; gap: 8px; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; }
+    .tier-price { font-size: 60px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; color: var(--ink); }
+    .tier-unit { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .tier-eq { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 16px; }
+    ul { list-style: none; padding: 0; margin: 0 0 18px; }
+    ul li { padding: 8px 0; font-size: 13.5px; color: var(--ink-2); border-top: 1px dashed rgba(10,12,20,0.16); display: flex; gap: 9px; line-height: 1.4; }
+    ul li:first-child { border-top: 0; }
+    ul li::before { content: '✓'; color: var(--green); font-weight: 800; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+    .pcta { text-align: center; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; font-family: inherit; border: 1.5px solid var(--ink); margin-top: auto; }
+    .pcta.free { background: var(--bg); color: var(--ink); }
+    .pcta.try { background: var(--amber); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+    .pcta.commit { background: var(--bg); color: var(--ink); box-shadow: 3px 3px 0 var(--bg); }
+
+    .foot { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); text-align: center; margin-top: 28px; letter-spacing: 1.4px; text-transform: uppercase; }
+    .foot strong { color: var(--ink); font-weight: 800; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="head">
+      <h1>Try free. Or commit for <span class="amber">45% off</span>.</h1>
+      <p class="sub">
+        <strong>On-chain payment in USDC on Polygon.</strong> No subscription. No card. No payment processor. Stop whenever — never auto-charged.
+      </p>
+    </div>
+
+    <div class="tiers">
+      <div class="tier">
+        <p class="tier-name">// FREE FOREVER</p>
+        <div class="tier-price-row">
+          <span class="tier-price">$0</span>
+          <span class="tier-unit">no card</span>
+        </div>
+        <div class="tier-eq">most users never need Pro</div>
+        <ul>
+          <li>Up to 3 legs per slip</li>
+          <li>Floating pill on every PM market</li>
+          <li>Live prices · combined multiplier</li>
+          <li>Risk score · 24h volume · resolution dates</li>
+          <li>Shareable slip card downloads</li>
+        </ul>
+        <div class="pcta free">Install free</div>
+      </div>
+
+      <div class="tier">
+        <p class="tier-name">// 30-DAY PASS</p>
+        <div class="tier-price-row">
+          <span class="tier-price">$14.99</span>
+          <span class="tier-unit">USDC</span>
+        </div>
+        <div class="tier-eq">$14.99 / month · pay once · 30 days</div>
+        <ul>
+          <li>Everything in Free</li>
+          <li>10K Monte Carlo simulation</li>
+          <li>Improve Odds auto-rebalancer</li>
+          <li>Half-Kelly bet sizing</li>
+          <li>Unlimited legs</li>
+          <li>Watermark-free slip cards</li>
+        </ul>
+        <div class="pcta try">Pay $14.99 →</div>
+      </div>
+
+      <div class="tier dark">
+        <div class="tier-flag">BEST VALUE · 45% OFF</div>
+        <p class="tier-name">// 365-DAY PASS</p>
+        <div class="tier-price-row">
+          <span class="tier-price">$99</span>
+          <span class="tier-unit">USDC</span>
+        </div>
+        <div class="tier-eq">≈ $8.25 / month · pay once · 365 days</div>
+        <ul>
+          <li>Everything in 30-day pass</li>
+          <li>365 days of access from your tx</li>
+          <li>Best $/sim ratio</li>
+          <li>One on-chain payment, then quiet</li>
+          <li>Locks in early-adopter price</li>
+          <li>Days stack on top of existing pass</li>
+        </ul>
+        <div class="pcta commit">Start 7-day trial →</div>
+      </div>
+    </div>
+
+    <p class="foot">7-day free trial · no card · cancel anytime · <strong>polyparlay.app</strong></p>
+  </div>
+</body>
+</html>

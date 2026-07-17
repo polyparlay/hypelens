@@ -1,0 +1,85 @@
+<!doctype html>
+<!-- CWS Screenshot 3 — Monte Carlo results populated. 1280×800. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PolyParlay — Monte Carlo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_styles.css" />
+  <style>
+    body { width: 1280px; height: 800px; }
+    .frame { width: 1280px; height: 800px; display: grid; grid-template-columns: 1fr 1.3fr; gap: 56px; padding: 70px 70px; align-items: center; }
+    h1 { font-size: 60px; line-height: 0.98; font-weight: 900; letter-spacing: -0.04em; margin: 0 0 22px; }
+    h1 .accent { color: var(--accent); }
+    .lede { font-size: 19px; line-height: 1.5; color: var(--ink-2); margin: 0 0 22px; }
+    .lede strong { color: var(--ink); font-weight: 800; }
+    .feature { display: flex; gap: 14px; margin-bottom: 18px; }
+    .feat-num { background: var(--ink); color: var(--bg); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px; width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .feat-body { font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
+    .feat-body strong { color: var(--ink); font-weight: 800; }
+
+    /* Sim results panel mock */
+    .sim-panel { background: var(--bg-2); border: 2px solid var(--ink); border-radius: 14px; padding: 22px; box-shadow: 7px 7px 0 var(--ink); }
+    .sim-head { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; letter-spacing: 1.8px; color: var(--accent); text-transform: uppercase; padding-bottom: 12px; border-bottom: 1.5px dashed var(--ink); margin-bottom: 16px; }
+    .sim-rerun { background: var(--amber); color: var(--ink); border: 1.5px solid var(--ink); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 2px 2px 0 var(--ink); }
+    .sim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .cell { background: white; border: 1.5px solid var(--ink); border-radius: 8px; padding: 14px 14px; box-shadow: 2px 2px 0 var(--ink); }
+    .cell-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.4px; color: var(--muted); text-transform: uppercase; font-weight: 800; margin-bottom: 6px; }
+    .cell-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 900; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+    .cell-value.pos { color: var(--green); }
+    .cell-value.neg { color: var(--red); }
+    .cell-value.amber { color: var(--amber-dk); }
+    .sim-foot { font-size: 11px; color: var(--muted); margin-top: 14px; line-height: 1.5; padding-top: 12px; border-top: 1px dashed rgba(10,12,20,0.18); }
+
+    /* Tiny historgram */
+    .dist { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; align-items: end; height: 80px; margin: 16px 0 4px; padding-bottom: 4px; border-bottom: 1.5px solid var(--ink); }
+    .dist .b { background: var(--amber); border-radius: 1px; border: 1px solid var(--ink); border-bottom: 0; }
+    .dist .b.hi { background: var(--green); }
+    .dist-axis { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.8px; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div>
+      <div class="mono" style="color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">// 10K Monte Carlo · runs in your browser</div>
+      <h1>Real win rate.<br/>Not just a <span class="accent">multiplier.</span></h1>
+      <p class="lede">
+        Most parlay tools show you a <strong>combined multiplier</strong> — the cost-basis ratio.
+        That's not your win rate. PolyParlay simulates <strong>10,000 outcomes</strong> per slip and shows you the actual joint win probability.
+      </p>
+      <div class="feature">
+        <span class="feat-num">01</span>
+        <div class="feat-body"><strong>Win-rate distribution</strong> — see the full shape, not just the mean</div>
+      </div>
+      <div class="feature">
+        <span class="feat-num">02</span>
+        <div class="feat-body"><strong>Expected value + ROI</strong> — long-run dollars, not vibes</div>
+      </div>
+      <div class="feature">
+        <span class="feat-num">03</span>
+        <div class="feat-body"><strong>Max drawdown + streaks</strong> — know the variance before you stake</div>
+      </div>
+    </div>
+
+    <div class="sim-panel">
+      <div class="sim-head">
+        <span>// MONTE CARLO · 10,000 SIMS</span>
+        <button class="sim-rerun">↻ Rerun</button>
+      </div>
+      <div class="dist">
+        <div class="b" style="height: 4%"></div><div class="b" style="height: 9%"></div><div class="b" style="height: 16%"></div><div class="b" style="height: 26%"></div><div class="b" style="height: 38%"></div><div class="b" style="height: 52%"></div><div class="b" style="height: 68%"></div><div class="b" style="height: 80%"></div><div class="b hi" style="height: 92%"></div><div class="b hi" style="height: 100%"></div><div class="b hi" style="height: 94%"></div><div class="b" style="height: 81%"></div><div class="b" style="height: 65%"></div><div class="b" style="height: 48%"></div><div class="b" style="height: 34%"></div><div class="b" style="height: 22%"></div><div class="b" style="height: 13%"></div><div class="b" style="height: 7%"></div><div class="b" style="height: 3%"></div><div class="b" style="height: 1%"></div>
+      </div>
+      <div class="dist-axis"><span>0% WR</span><span>SLIP: 57%</span><span>100%</span></div>
+      <div class="sim-grid" style="margin-top: 18px;">
+        <div class="cell"><div class="cell-label">Win rate (sim)</div><div class="cell-value pos">57.4%</div></div>
+        <div class="cell"><div class="cell-label">Implied WR</div><div class="cell-value amber">36.1%</div></div>
+        <div class="cell"><div class="cell-label">Multiplier</div><div class="cell-value">3.41×</div></div>
+        <div class="cell"><div class="cell-label">Win payout</div><div class="cell-value pos">$85.25</div></div>
+        <div class="cell"><div class="cell-label">Expected ROI</div><div class="cell-value pos">+24.96%</div></div>
+        <div class="cell"><div class="cell-label">Max drawdown</div><div class="cell-value neg">$143</div></div>
+      </div>
+      <div class="sim-foot">Each iteration: independent bernoulli per leg using market-implied probabilities. Win rate depends on leg odds only — stake changes $ amounts but not probability.</div>
+    </div>
+  </div>
+</body>
+</html>

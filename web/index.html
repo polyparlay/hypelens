@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PolyParlay — Multi-leg parlay builder for Polymarket</title>
+    <meta name="description" content="Build multi-leg parlays from Polymarket markets. 10K Monte Carlo sim, auto-rebalance weak legs, shareable slip cards. Free Chrome extension." />
+    <meta property="og:title" content="PolyParlay — Parlay builder for Polymarket" />
+    <meta property="og:description" content="Stack 3+ Polymarket markets into one slip. 10K Monte Carlo. Auto-rebalance weak legs. Honest payout math." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://polyparlay.app" />
+    <meta property="og:image" content="https://polyparlay.app/og-default.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PolyParlay" />
+    <meta name="twitter:description" content="Multi-leg parlays for Polymarket. 10K Monte Carlo. Improve Odds. Chrome extension." />
+    <meta name="twitter:image" content="https://polyparlay.app/og-default.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f5f1e8;       /* warm cream paper */
+        --bg-2: #fdfcf7;     /* lighter card bg */
+        --ink: #0a0c14;      /* near-black ink */
+        --ink-2: #1f2937;
+        --muted: #6b6f7a;
+        --line: #0a0c14;     /* hard borders use ink */
+        --accent: #4f46e5;   /* electric indigo */
+        --amber: #fbbf24;
+        --green: #16a34a;
+        --red: #dc2626;
+
+        --shadow-lg: 6px 6px 0 var(--ink);
+        --shadow-md: 4px 4px 0 var(--ink);
+        --shadow-sm: 3px 3px 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: var(--ink);
+        background-color: var(--bg);
+        /* dot-grid bg pattern, very subtle */
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(10, 12, 20, 0.08) 1px, transparent 0);
+        background-size: 22px 22px;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+      /* ============================================================
+         TOP TICKER STRIP — Hyperliquid/Polymarket aesthetic
+         ============================================================ */
+      .ticker {
+        background: var(--ink);
+        color: var(--bg);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 8px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        border-bottom: 1.5px solid var(--ink);
+      }
+      .ticker-inner {
+        display: inline-block;
+        animation: scroll 38s linear infinite;
+        padding-left: 100%;
+      }
+      .ticker-inner span { margin: 0 28px; }
+      .ticker-inner .live::before {
+        content: '●';
+        color: var(--green);
+        margin-right: 8px;
+        text-shadow: 0 0 6px var(--green);
+      }
+      .ticker-inner .hi { color: var(--amber); }
+      .ticker-inner .acc { color: #a5b4fc; }
+      @keyframes scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+      }
+
+      /* ============================================================
+         NAV
+         ============================================================ */
+      .nav {
+        max-width: 1280px; margin: 0 auto;
+        padding: 24px;
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 24px;
+      }
+      .brand {
+        display: flex; align-items: center; gap: 12px;
+        font-weight: 800;
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 17px;
+        letter-spacing: -0.01em;
+      }
+      .brand-mark {
+        width: 40px; height: 40px;
+        border-radius: 8px;
+        background: var(--ink);
+        border: 1.5px solid var(--ink);
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0 5px;
+        font-weight: 900; font-size: 22px; line-height: 1;
+        letter-spacing: -2px;
+        box-shadow: var(--shadow-sm);
+      }
+      .brand-mark .p1 { color: var(--accent); }
+      .brand-mark .p2 { color: var(--amber); }
+      .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; font-weight: 500; }
+      .nav-links a { color: var(--ink); text-decoration: none; }
+      .nav-links a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+      .nav-links .install {
+        background: var(--ink); color: var(--bg) !important;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1.5px solid var(--ink);
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+      }
+      .nav-links .install:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; }
+      .nav-links .install:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+
+      /* ============================================================
+         HERO — tight, fits above the fold on a 720px viewport.
+         Left column is text + CTA, right column is the animated popup
+         mock. Together they fit within ~640px tall so nothing critical
+         requires scrolling on a standard laptop window.
+         ============================================================ */
+      .hero {
+        max-width: 1280px; margin: 0 auto;
+        padding: 28px 24px 36px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: center;
+        min-height: calc(100vh - 100px);
+      }
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 2px; text-transform: uppercase;
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        padding: 6px 12px;
+        border-radius: 6px;
+        color: var(--ink);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 18px;
+      }
+      .eyebrow .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 8px var(--green);
+        animation: pulse 1.6s ease-in-out infinite;
+      }
+      @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.45 } }
+      h1 {
+        font-size: clamp(36px, 5vw, 62px);
+        line-height: 1.0;
+        margin: 0 0 18px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        color: var(--ink);
+      }
+      h1 .accent { color: var(--accent); }
+      h1 .amber  { color: #b45309; }
+      h1 .strike { text-decoration: line-through; text-decoration-thickness: 3px; text-decoration-color: var(--red); opacity: 0.5; }
+      .lede {
+        font-size: clamp(15px, 1.4vw, 18px);
+        color: var(--ink-2);
+        max-width: 520px;
+        margin: 0 0 22px;
+        line-height: 1.5;
+      }
+      .lede strong { color: var(--ink); font-weight: 700; }
+      .cta-row {
+        display: flex; gap: 12px; flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .btn {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 16px 26px;
+        border-radius: 9px;
+        font-weight: 800; font-size: 15px;
+        text-decoration: none;
+        cursor: pointer; border: 1.5px solid var(--ink);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        font-family: inherit;
+      }
+      .btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+      .btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+      .btn.primary {
+        background: var(--accent); color: white;
+        box-shadow: var(--shadow-md);
+      }
+      .btn.ghost {
+        background: var(--bg-2); color: var(--ink);
+        box-shadow: var(--shadow-md);
+      }
+      .btn.amber { background: var(--amber); color: var(--ink); box-shadow: var(--shadow-md); }
+
+      .trust-row {
+        display: flex; gap: 22px; flex-wrap: wrap;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px; color: var(--muted);
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+      .trust-row span::before { content: '✓ '; color: var(--green); font-weight: 800; }
+
+      /* === HERO VISUAL — animated popup mock =============================
+         This is the actual extension popup, rendered in HTML/CSS, animated
+         through the real user journey on a 6-second loop. State machine:
+           [0.0–1.5s]  RAW    — slip built, sim has run, 36% WR (red)
+           [1.5–2.7s]  FLIP   — "Improve Odds" pill appears + leg 3 flips
+           [2.7–4.8s]  LIFTED — leg flipped, WR jumps to 57% (green)
+           [4.8–6.0s]  STAKE  — Kelly stake card slides in: "$58 / $500"
+         Every state shows the literal UI a user sees — no abstractions. */
+      .hero-visual {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 18px 18px 22px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        max-width: 460px;
+        width: 100%;
+        justify-self: center;
+      }
+      .hv-head {
+        display: flex; justify-content: space-between; align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px; font-weight: 800;
+        letter-spacing: 1.6px; text-transform: uppercase;
+        color: var(--accent);
+        padding: 0 4px 10px;
+        border-bottom: 1.5px dashed var(--ink);
+        margin-bottom: 10px;
+      }
+      .hv-head .pp-count { color: var(--ink); }
+      .hv-head .pp-pro {
+        color: var(--ink); background: var(--amber);
+        padding: 3px 7px;
+        border: 1.5px solid var(--ink);
+        border-radius: 5px;
+        font-size: 9px;
+        box-shadow: 2px 2px 0 var(--ink);
+      }
+
+      /* Leg row — matches the real popup leg card */
+      .hv-leg {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 9px 12px;
+        background: white;
+        border: 1.5px solid var(--ink);
+        border-radius: 7px;
+        margin-bottom: 6px;
+        align-items: center;
+        box-shadow: 2px 2px 0 var(--ink);
+        position: relative;
+      }
+      .hv-leg > :first-child { min-width: 0; }
+      .hv-leg-q {
+        color: var(--ink); font-weight: 700;
+        font-size: 12.5px; line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hv-leg-meta {
+        color: var(--muted); font-size: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        margin-top: 3px; letter-spacing: 0.4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hv-leg-meta .yes { color: var(--green); font-weight: 800; }
+      .hv-leg-meta .no  { color: var(--red);   font-weight: 800; }
+      .hv-leg-price {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800; color: var(--ink); font-size: 14px;
+        text-align: right;
+        min-width: 52px;
+      }
+
+      /* Leg 3 has two stacked content layers — weak (red) and flipped (green) —
+         that cross-fade with the animation. Implementation: CSS grid stacking.
+         Both states share a single grid cell; the wider one defines the cell
+         size; opacity animations toggle visibility. No absolute positioning =
+         no chance of escaping the price cell into the row container. */
+      .hv-leg.swap { transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+      .hv-leg.swap.weak { animation: leg-weak 6s steps(1, end) infinite; }
+      @keyframes leg-weak {
+        0%,   24%  { border-color: var(--red);   box-shadow: 2px 2px 0 var(--red); }
+        25%, 100%  { border-color: var(--green); box-shadow: 2px 2px 0 var(--green); }
+      }
+      .hv-state {
+        display: inline-grid;
+        grid-template-areas: 'stack';
+        vertical-align: top;
+      }
+      .hv-state > .state-raw,
+      .hv-state > .state-new {
+        grid-area: stack;
+        white-space: nowrap;
+      }
+      .hv-state .state-raw  { animation: swap-out 6s steps(1, end) infinite; }
+      .hv-state .state-new  { animation: swap-in  6s steps(1, end) infinite; opacity: 0; }
+      @keyframes swap-out {
+        0%,  24%  { opacity: 1; }
+        25%, 100% { opacity: 0; }
+      }
+      @keyframes swap-in {
+        0%,  24%  { opacity: 0; }
+        25%, 100% { opacity: 1; }
+      }
+
+      /* === Monte Carlo result row — WR badge + tiny histogram bar */
+      .hv-sim {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 11px 12px;
+        margin-top: 10px;
+        background: var(--ink);
+        color: var(--bg);
+        border: 1.5px solid var(--ink);
+        border-radius: 8px;
+        box-shadow: 3px 3px 0 var(--amber);
+        position: relative;
+      }
+      .hv-sim-label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 1.4px;
+        color: var(--amber);
+        text-transform: uppercase;
+        margin-bottom: 3px;
+        font-weight: 700;
+      }
+      .hv-sim-wr {
+        position: relative;
+        height: 30px;
+        min-width: 110px;
+      }
+      .hv-sim-wr .wr {
+        position: absolute; inset: 0;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 24px; font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        display: flex; align-items: baseline; gap: 6px;
+      }
+      .hv-sim-wr .wr-raw { color: #fca5a5; animation: swap-out 6s steps(1, end) infinite; }
+      .hv-sim-wr .wr-new { color: #86efac; animation: swap-in  6s steps(1, end) infinite; opacity: 0; }
+      .hv-sim-wr small {
+        font-size: 11px; color: #9ca3af; font-weight: 600;
+        letter-spacing: 0.8px;
+      }
+      .hv-sim-wr .pp {
+        background: var(--green); color: #022;
+        font-size: 10px; padding: 2px 5px;
+        border-radius: 3px; font-weight: 800;
+        margin-left: 3px;
+      }
+      /* Mini-histogram: 14 bars that pulse to feel "live computing" */
+      .hv-histo {
+        display: grid;
+        grid-template-columns: repeat(14, 1fr);
+        align-items: end;
+        gap: 2px;
+        height: 36px;
+        padding-bottom: 0;
+      }
+      .hv-histo .b {
+        background: var(--amber);
+        border-radius: 1px;
+        height: var(--h);
+        animation: histo-pulse 1.4s ease-in-out var(--d, 0s) infinite;
+        opacity: 0.85;
+      }
+      @keyframes histo-pulse {
+        0%, 100% { transform: scaleY(1);    opacity: 0.85; }
+        50%      { transform: scaleY(0.6);  opacity: 1; }
+      }
+
+      /* === Improve Odds prompt — appears between RAW and FLIP states.
+         Sits in normal flow, fades via opacity + slides on transform.
+         Visible window: 15-25% of the loop (just before the leg swap). */
+      .hv-improve {
+        display: flex; align-items: center; gap: 8px;
+        padding: 9px 12px;
+        background: var(--accent);
+        color: white;
+        border: 1.5px solid var(--ink);
+        border-radius: 7px;
+        margin-top: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        box-shadow: 2px 2px 0 var(--ink);
+        animation: improve-show 6s steps(1, end) infinite;
+        opacity: 0;
+      }
+      .hv-improve .ar { font-weight: 900; font-size: 13px; }
+      @keyframes improve-show {
+        0%,  14%  { opacity: 0; }
+        15%, 24%  { opacity: 1; }
+        25%, 100% { opacity: 0; }
+      }
+
+      /* === Stake recommendation — appears in LIFTED state */
+      .hv-stake {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 11px 14px;
+        background: var(--amber);
+        border: 1.5px solid var(--ink);
+        border-radius: 8px;
+        margin-top: 8px;
+        box-shadow: 3px 3px 0 var(--ink);
+        animation: stake-show 6s ease-out infinite;
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      .hv-stake-lbl {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 1.4px;
+        color: var(--ink);
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-bottom: 2px;
+      }
+      .hv-stake-sub {
+        font-size: 11px; color: var(--ink-2);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .hv-stake-val {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 28px; font-weight: 900;
+        color: var(--ink); letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      .hv-stake-val .of { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+      @keyframes stake-show {
+        0%,  44% { opacity: 0; transform: translateY(8px); }
+        50%, 96% { opacity: 1; transform: translateY(0); }
+        100%     { opacity: 0; transform: translateY(8px); }
+      }
+
+      /* Mobile: stack hero column-on-column and let the visual take full width */
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 24px; }
+        .hero-visual { margin: 0 auto; max-width: 460px; }
+        h1 { font-size: clamp(32px, 8vw, 44px); }
+      }
+      .hv-head {
+        display: flex; justify-content: space-between;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px; font-weight: 700;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        color: var(--accent);
+        padding: 4px 6px 12px;
+        border-bottom: 1.5px dashed var(--ink);
+        margin-bottom: 12px;
+      }
+      .hv-head .pp-count { color: var(--ink); }
+      .hv-leg {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        padding: 12px 14px;
+        background: white;
+        border: 1.5px solid var(--ink);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+      }
+      .hv-leg.flipped { border-color: var(--green); box-shadow: 3px 3px 0 var(--green); }
+      .hv-leg-q { color: var(--ink); font-weight: 700; font-size: 14px; line-height: 1.3; }
+      .hv-leg-meta { color: var(--muted); font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+      .hv-leg-meta .yes { color: var(--green); font-weight: 700; }
+      .hv-leg-meta .no  { color: var(--red); font-weight: 700; }
+      .hv-leg-price { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--ink); font-size: 15px; }
+      .hv-flip {
+        display: inline-block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9.5px; font-weight: 800;
+        color: var(--green);
+        letter-spacing: 1px;
+        margin-left: 8px;
+        text-transform: uppercase;
+      }
+      .hv-perf {
+        position: relative;
+        height: 16px;
+        margin: 10px -18px;
+        border-top: 1.5px dashed var(--ink);
+        border-bottom: 1.5px dashed var(--ink);
+        background: var(--bg);
+      }
+      .hv-stub { padding: 6px 6px 2px; }
+      .hv-stub-row {
+        display: flex; justify-content: space-between; align-items: baseline;
+        font-size: 13px;
+        padding: 5px 0;
+      }
+      .hv-stub-row .lbl { color: var(--muted); }
+      .hv-stub-row .val {
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--ink); font-weight: 700;
+      }
+      .hv-stub-row.green .val { color: var(--green); font-weight: 800; font-size: 15px; }
+      .hv-stub-row.accent .val { color: var(--accent); }
+
+      /* ============================================================
+         GRID-OF-PROOF (metric pills)
+         ============================================================ */
+      .metrics {
+        max-width: 1280px; margin: -20px auto 0;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .metric {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 10px;
+        padding: 18px 20px;
+        box-shadow: var(--shadow-sm);
+      }
+      .metric-val {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: clamp(22px, 2.4vw, 30px);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin-bottom: 4px;
+      }
+      .metric-val .accent { color: var(--accent); }
+      .metric-val .amber  { color: #b45309; }
+      .metric-val .green  { color: var(--green); }
+      .metric-lbl {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* ============================================================
+         SECTION
+         ============================================================ */
+      .section {
+        max-width: 1280px; margin: 0 auto;
+        padding: 100px 24px 20px;
+      }
+      .sec-head {
+        display: flex; align-items: end; justify-content: space-between;
+        gap: 24px; flex-wrap: wrap;
+        margin-bottom: 40px;
+        border-bottom: 1.5px solid var(--ink);
+        padding-bottom: 24px;
+      }
+      .sec-head .sec-num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .sec-head h2 {
+        font-size: clamp(32px, 4.2vw, 52px);
+        margin: 0;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+        color: var(--ink);
+      }
+      .sec-head .sec-sub {
+        font-size: 16px;
+        color: var(--muted);
+        max-width: 380px;
+        text-align: right;
+      }
+
+      /* ============================================================
+         STEPS — text-only explanation of what the hero animation
+         demonstrates. Kept simple because the hero is already the
+         heavy visual.
+         ============================================================ */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .step {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: var(--shadow-md);
+      }
+      .step-num {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 36px; height: 36px;
+        background: var(--ink);
+        color: var(--bg);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px; font-weight: 800;
+        border-radius: 8px;
+        margin-bottom: 16px;
+      }
+      .step h3 { margin: 0 0 8px; font-size: 19px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+      .step p { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.55; }
+      .step strong { color: var(--ink); font-weight: 700; }
+
+      /* === Unused bento CSS retained below for the section's animated
+         color tokens — actual bento markup has been removed in favour of
+         the hero animation. */
+      .why-bento {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 16px;
+      }
+      @media (max-width: 900px) {
+        .why-bento { grid-template-columns: 1fr; }
+      }
+      .bento-cell {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 12px;
+        padding: 26px 24px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+      }
+      .cell-tag {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 18px;
+      }
+      .cell-foot {
+        font-size: 13px;
+        color: var(--ink-2);
+        line-height: 1.55;
+      }
+      .cell-foot strong { color: var(--ink); font-weight: 700; }
+
+      /* ----- Cell 1: animated MC histogram (large, dark) ------------- */
+      .histo-cell {
+        grid-row: 1 / span 2;
+        background: var(--ink);
+        color: var(--bg);
+        box-shadow: 6px 6px 0 var(--amber);
+        padding: 28px;
+      }
+      .histo-cell .cell-tag { color: var(--amber); }
+      .histo-cell .cell-foot { color: #d1d5db; }
+      .histo-cell .cell-foot strong { color: var(--amber); }
+      .histo {
+        display: grid;
+        grid-template-columns: repeat(20, 1fr);
+        align-items: end;
+        height: clamp(170px, 22vw, 220px);
+        gap: 4px;
+        padding-bottom: 6px;
+        margin-bottom: 12px;
+        border-bottom: 1.5px solid var(--amber);
+      }
+      .histo .bar {
+        background: #1e293b;
+        border: 1.5px solid var(--amber);
+        border-bottom: 0;
+        height: 0;
+        border-radius: 2px 2px 0 0;
+        animation: histo-bar 5.4s cubic-bezier(0.5, 0, 0.4, 1) var(--d, 0s) infinite;
+        will-change: height, background;
+      }
+      .histo .bar.hi { /* the peak bins glow amber once filled */ }
+      @keyframes histo-bar {
+        0%   { height: 0;            background: #1e293b; }
+        18%  { height: var(--h);      background: var(--amber); }
+        72%  { height: var(--h);      background: var(--amber); }
+        82%  { height: 0;             background: #1e293b; }
+        100% { height: 0;             background: #1e293b; }
+      }
+      /* Peak bars get a stronger glow so the eye knows where the WR landed */
+      .histo .bar.hi { animation-name: histo-bar-hi; }
+      @keyframes histo-bar-hi {
+        0%   { height: 0;            background: #1e293b; box-shadow: none; }
+        18%  { height: var(--h);      background: #facc15; box-shadow: 0 0 14px rgba(250, 204, 21, 0.6); }
+        72%  { height: var(--h);      background: #facc15; box-shadow: 0 0 14px rgba(250, 204, 21, 0.6); }
+        82%  { height: 0;             background: #1e293b; box-shadow: none; }
+        100% { height: 0;             background: #1e293b; box-shadow: none; }
+      }
+      .histo-axis {
+        display: flex; justify-content: space-between; align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: #9ca3af;
+        letter-spacing: 0.8px;
+        margin-bottom: 16px;
+      }
+      .histo-axis .histo-marker {
+        color: var(--amber);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .histo-axis .histo-marker strong { color: var(--bg); font-weight: 900; }
+
+      /* ----- Cell 2: Improve Odds before/after ----------------------- */
+      .flip-cell .cell-tag { color: var(--accent); }
+      .flip-pane {
+        background: var(--bg);
+        border: 1.5px solid var(--ink);
+        border-radius: 9px;
+        padding: 14px 14px 12px;
+        box-shadow: 2px 2px 0 var(--ink);
+        position: relative;
+      }
+      .flip-pane.after { box-shadow: 3px 3px 0 var(--green); border-color: var(--green); }
+      .flip-label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px; font-weight: 800; letter-spacing: 1.8px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .flip-pane.after .flip-label { color: var(--green); }
+      .flip-wr {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 26px; font-weight: 900;
+        letter-spacing: -0.03em;
+        margin-bottom: 8px;
+        line-height: 1;
+        color: var(--ink);
+      }
+      .flip-wr span { font-size: 12px; color: var(--muted); margin-left: 4px; font-weight: 600; letter-spacing: 1px; }
+      .flip-wr.lift { color: var(--green); }
+      .lift-pp {
+        display: inline-block;
+        background: var(--green);
+        color: #fff;
+        font-size: 11px; font-weight: 800;
+        padding: 2px 7px;
+        border-radius: 4px;
+        margin-left: 6px;
+        vertical-align: middle;
+        letter-spacing: 0.4px;
+      }
+      .flip-leg {
+        font-size: 12px;
+        line-height: 1.55;
+        padding: 4px 0;
+        border-top: 1px dashed rgba(10, 12, 20, 0.16);
+        color: var(--ink-2);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .flip-leg:first-of-type { border-top: 0; padding-top: 6px; }
+      .flip-leg .flip-side { color: var(--accent); font-weight: 700; }
+      .flip-leg.weak { color: var(--red); }
+      .flip-leg.weak .flip-side { color: var(--red); }
+      .weak-tag {
+        display: inline-block;
+        background: var(--red); color: #fff;
+        font-size: 9px; font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 3px;
+        margin-left: 4px;
+        letter-spacing: 0.4px;
+      }
+      .flip-leg.flipped { color: var(--green); font-weight: 600; }
+      .flip-leg.flipped .flip-side { color: var(--green); }
+      .flipped-tag {
+        display: inline-block;
+        background: var(--green); color: #fff;
+        font-size: 9px; font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 3px;
+        margin-left: 4px;
+        letter-spacing: 0.4px;
+      }
+      .flip-arrow {
+        text-align: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 18px; font-weight: 900;
+        color: var(--accent);
+        margin: 8px 0 6px;
+        animation: arrow-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes arrow-pulse {
+        0%, 100% { transform: translateY(0);   opacity: 0.6; }
+        50%      { transform: translateY(2px); opacity: 1;   }
+      }
+
+      /* ----- Cell 3: Kelly bet sizing (amber callout) ---------------- */
+      .bet-cell {
+        background: var(--amber);
+        border-color: var(--ink);
+        box-shadow: 5px 5px 0 var(--ink);
+      }
+      .bet-cell .cell-tag { color: var(--ink); }
+      .bet-row {
+        display: flex; justify-content: space-between; align-items: baseline;
+        padding: 6px 0;
+        font-size: 13.5px;
+        color: var(--ink-2);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .bet-val { color: var(--ink); font-weight: 800; font-size: 14px; }
+      .bet-divider {
+        height: 1.5px;
+        background: var(--ink);
+        margin: 8px 0;
+      }
+      .bet-row.big { font-size: 14px; padding: 6px 0 2px; color: var(--ink); font-weight: 700; }
+      .big-num {
+        font-size: 28px !important;
+        font-weight: 900 !important;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      .bet-cell .cell-foot {
+        color: var(--ink-2);
+        margin-top: 10px;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .bet-cell .cell-foot strong { color: var(--ink); }
+
+      /* ----- Cell 4: EV gain summary (green accent) ------------------ */
+      .ev-cell { border-color: var(--ink); }
+      .ev-cell .cell-tag { color: var(--green); }
+      .ev-bignum {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: clamp(42px, 5vw, 60px);
+        font-weight: 900;
+        color: var(--green);
+        letter-spacing: -0.04em;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .ev-sub {
+        font-size: 13.5px;
+        color: var(--ink-2);
+        line-height: 1.5;
+        margin-bottom: 12px;
+      }
+      .ev-rule {
+        font-size: 13px;
+        color: var(--ink-2);
+        line-height: 1.55;
+        padding-top: 12px;
+        border-top: 1px dashed rgba(10, 12, 20, 0.18);
+      }
+      .ev-rule strong { color: var(--green); font-weight: 800; }
+
+      /* ============================================================
+         FEATURES
+         ============================================================ */
+      .features {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .feat {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 30px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+      }
+      .feat.pro { background: linear-gradient(165deg, #fef3c7, #fefbf0); }
+      .feat .tag {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px; letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 5px 9px; border-radius: 5px;
+        background: var(--ink); color: var(--bg);
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+      .feat.pro .tag { background: var(--amber); color: var(--ink); }
+      .feat h3 {
+        margin: 0 0 14px;
+        font-size: clamp(22px, 2.4vw, 28px);
+        font-weight: 900;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+      .feat p {
+        color: var(--ink-2);
+        margin: 0 0 18px;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+      .feat ul { margin: 0; padding: 0; list-style: none; }
+      .feat li {
+        font-size: 14px;
+        padding: 7px 0;
+        display: flex; gap: 10px;
+        color: var(--ink);
+        border-top: 1px dashed rgba(10, 12, 20, 0.18);
+      }
+      .feat li:first-child { border-top: 0; }
+      .feat li::before {
+        content: '→';
+        color: var(--accent);
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+      .feat.pro li::before { color: #b45309; }
+
+      /* ============================================================
+         PRICING
+         ============================================================ */
+      .pricing {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      @media (max-width: 900px) {
+        .pricing { grid-template-columns: 1fr; max-width: 520px; }
+      }
+      /* Annual variant gets an amber offset shadow to signal it's the
+         flagged "best value" option without breaking the dark Pro card style. */
+      .price-card.pro-annual { box-shadow: 6px 6px 0 var(--amber); }
+      .price-card.pro-annual .pcta { background: var(--bg); color: var(--ink); box-shadow: 3px 3px 0 var(--bg); }
+      .price-card.pro-annual .pcta:hover { box-shadow: 4px 4px 0 var(--bg); }
+      .price-card {
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 34px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+      }
+      .price-card.pro {
+        background: var(--ink);
+        color: var(--bg);
+      }
+      .price-card.pro h3, .price-card.pro li { color: var(--bg); }
+      .price-card .badge {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; letter-spacing: 1.3px;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 18px;
+      }
+      .price-card.free .badge { color: var(--green); }
+      .price-card.pro .badge  { color: var(--amber); }
+      .price-card .pamount {
+        display: flex; align-items: baseline; gap: 10px;
+        margin-bottom: 8px;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .price-card .pamount strong {
+        font-size: clamp(40px, 5.5vw, 58px);
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .price-card .pamount .unit { color: var(--muted); font-size: 14px; font-weight: 500; }
+      .price-card.pro .pamount .unit { color: #9ca3af; }
+      .price-card .pmeta { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+      .price-card.pro .pmeta { color: #9ca3af; }
+      .price-card ul { margin: 0 0 24px; padding: 0; list-style: none; }
+      .price-card li {
+        padding: 7px 0;
+        font-size: 14px;
+        display: flex; gap: 10px;
+        border-top: 1px dashed rgba(10, 12, 20, 0.16);
+      }
+      .price-card.pro li { border-top-color: rgba(255,255,255,0.12); }
+      .price-card li:first-child { border-top: 0; }
+      .price-card li::before { content: '✓'; color: var(--green); font-weight: 800; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+      .price-card.pro li::before { color: var(--amber); }
+      .price-card .pcta {
+        display: block; text-align: center;
+        padding: 14px 20px;
+        border-radius: 9px;
+        font-weight: 800;
+        text-decoration: none;
+        font-size: 14px;
+        font-family: inherit;
+        border: 1.5px solid var(--ink);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        box-shadow: var(--shadow-sm);
+      }
+      .price-card .pcta:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+      .price-card .pcta:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+      .price-card.free .pcta { background: var(--bg); color: var(--ink); }
+      .price-card.pro  .pcta { background: var(--amber); color: var(--ink); box-shadow: 3px 3px 0 var(--amber); }
+      .price-card.pro  .pcta:hover { box-shadow: 4px 4px 0 var(--bg); }
+
+      /* ============================================================
+         DISCLAIMER STRIP
+         ============================================================ */
+      .disclaimer-strip {
+        max-width: 960px; margin: 32px auto 0;
+        padding: 22px 28px;
+        background: var(--bg-2);
+        border: 1.5px solid var(--ink);
+        border-left: 6px solid var(--amber);
+        border-radius: 10px;
+        font-size: 14px;
+        color: var(--ink-2);
+        line-height: 1.6;
+        box-shadow: var(--shadow-sm);
+      }
+      .disclaimer-strip strong { color: var(--ink); font-weight: 800; }
+
+      /* ============================================================
+         INSTALL BLOCK
+         ============================================================ */
+      .install-block {
+        max-width: 880px; margin: 50px auto 0;
+        text-align: center;
+      }
+      .install-block .big-cta {
+        padding: 22px 36px;
+        font-size: 18px;
+      }
+      .install-block .micro {
+        margin-top: 16px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--muted);
+        letter-spacing: 0.5px;
+      }
+
+      /* ============================================================
+         FOOTER
+         ============================================================ */
+      .footer {
+        max-width: 1280px; margin: 100px auto 0;
+        padding: 32px 24px 60px;
+        display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+        border-top: 1.5px solid var(--ink);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .footer .links a {
+        color: var(--ink); text-decoration: none; margin-left: 18px; font-weight: 600;
+      }
+      .footer .links a:hover { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+
+      /* ============================================================
+         RESPONSIVE
+         ============================================================ */
+      @media (max-width: 960px) {
+        .hero { grid-template-columns: 1fr; padding-top: 36px; gap: 40px; }
+        .hero-visual { order: 2; }
+        .metrics { grid-template-columns: repeat(2, 1fr); }
+        .steps { grid-template-columns: 1fr; }
+        .features { grid-template-columns: 1fr; }
+        .pricing { grid-template-columns: 1fr; }
+        .sec-head { flex-direction: column; align-items: flex-start; }
+        .sec-head .sec-sub { text-align: left; }
+      }
+      @media (max-width: 480px) {
+        .nav-links { gap: 14px; }
+        .nav-links a:not(.install) { display: none; }
+        .metrics { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Top ticker -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-inner">
+        <span class="live">LIVE</span>
+        <span>POLYPARLAY V1.0</span>
+        <span class="acc">CHROME EXTENSION + WEB</span>
+        <span>10,000 MONTE CARLO SIMS / SLIP</span>
+        <span class="hi">PRO $14.99 / 30D · TRY IT</span>
+        <span>OR $99 / 365D · 45% OFF MONTHLY</span>
+        <span class="acc">7-DAY FREE TRIAL · NO CARD</span>
+        <span>POLYGON · ON-CHAIN VERIFIED</span>
+        <span class="hi">NO PAYMENT PROCESSOR</span>
+        <span>NO WALLET CONNECT</span>
+        <!-- duplicate so the loop is continuous -->
+        <span class="live">LIVE</span>
+        <span>POLYPARLAY V1.0</span>
+        <span class="acc">CHROME EXTENSION + WEB</span>
+        <span>10,000 MONTE CARLO SIMS / SLIP</span>
+        <span class="hi">PRO $14.99 / 30D · TRY IT</span>
+        <span>OR $99 / 365D · 45% OFF MONTHLY</span>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="brand" href="/">
+        <span class="brand-mark"><span class="p1">P</span><span class="p2">P</span></span>
+        PolyParlay
+      </a>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a class="install" href="#install">Install</a>
+      </div>
+    </nav>
+
+    <!-- ============================================================
+         HERO
+         ============================================================ -->
+    <section class="hero">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> Live · v1.0 · Chrome</div>
+        <h1>
+          Watch your win rate
+          <span class="amber">jump 21pp</span>
+          in one click.
+        </h1>
+        <p class="lede">
+          Standard parlay tools <strong>multiply prices</strong>. PolyParlay runs
+          <strong>10,000 Monte Carlo sims</strong> on your slip, flips your weakest leg,
+          and computes <strong>Kelly bet size</strong> — automatically. →
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" id="installCta" href="#install">Install free →</a>
+          <a class="btn ghost" href="#pricing">Pricing</a>
+        </div>
+        <div class="trust-row">
+          <span>NO WALLET CONNECT</span>
+          <span>FREE UP TO 3 LEGS</span>
+          <span>$14.99/MO PRO</span>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           HERO VISUAL — animated popup mock, real-UX demonstration.
+           6-second loop walks through: RAW 36% WR → Improve Odds prompt
+           → leg flips + WR lifts to 57% → Kelly stake card slides in.
+           Every element is a one-to-one match for the actual extension.
+           ============================================================ -->
+      <div class="hero-visual" aria-hidden="true">
+
+        <div class="hv-head">
+          <span>// POLYPARLAY · 03 LEGS</span>
+          <span class="pp-pro">PRO</span>
+        </div>
+
+        <div class="hv-leg">
+          <div>
+            <div class="hv-leg-q">Fed cuts rates June 2026</div>
+            <div class="hv-leg-meta"><span class="yes">YES</span> · RESOLVES 18 JUN</div>
+          </div>
+          <div class="hv-leg-price">$0.62</div>
+        </div>
+        <div class="hv-leg">
+          <div>
+            <div class="hv-leg-q">Lakers over 102.5 vs Nuggets</div>
+            <div class="hv-leg-meta"><span class="yes">YES</span> · RESOLVES TONIGHT</div>
+          </div>
+          <div class="hv-leg-price">$0.61</div>
+        </div>
+
+        <!-- Leg 3 = the leg Improve Odds will flip. Its content swaps and
+             border colour transitions from red → green when the flip lands. -->
+        <div class="hv-leg swap weak">
+          <div>
+            <div class="hv-leg-q">
+              <span class="hv-state">
+                <span class="state-raw">BTC above $100K by May 31</span>
+                <span class="state-new">BTC ≤ $100K by May 31</span>
+              </span>
+            </div>
+            <div class="hv-leg-meta">
+              <span class="hv-state">
+                <span class="state-raw" style="color:var(--red); font-weight: 800;">YES · WEAK LEG</span>
+                <span class="state-new" style="color:var(--green); font-weight: 800;">NO · FLIPPED ✓</span>
+              </span>
+            </div>
+          </div>
+          <div class="hv-leg-price">
+            <span class="hv-state">
+              <span class="state-raw" style="color:var(--red);">$0.29</span>
+              <span class="state-new"  style="color:var(--green);">$0.71</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- "Improve Odds" prompt — only visible between RAW and FLIP states -->
+        <div class="hv-improve">
+          <span class="ar">↗</span>
+          <span>Improve Odds: flip BTC leg → 57% WR</span>
+        </div>
+
+        <!-- Monte Carlo result tile — WR cycles 36% (red) → 57% (green) -->
+        <div class="hv-sim">
+          <div>
+            <div class="hv-sim-label">// 10K MC</div>
+            <div class="hv-sim-wr">
+              <div class="wr wr-raw">36% <small>WR</small></div>
+              <div class="wr wr-new">57% <small>WR</small> <span class="pp">+21pp</span></div>
+            </div>
+          </div>
+          <div class="hv-histo">
+            <div class="b" style="--h: 18%; --d: 0.0s"></div>
+            <div class="b" style="--h: 32%; --d: 0.1s"></div>
+            <div class="b" style="--h: 54%; --d: 0.2s"></div>
+            <div class="b" style="--h: 78%; --d: 0.3s"></div>
+            <div class="b" style="--h: 92%; --d: 0.4s"></div>
+            <div class="b" style="--h: 100%; --d: 0.5s"></div>
+            <div class="b" style="--h: 88%; --d: 0.6s"></div>
+            <div class="b" style="--h: 64%; --d: 0.7s"></div>
+            <div class="b" style="--h: 42%; --d: 0.8s"></div>
+            <div class="b" style="--h: 28%; --d: 0.9s"></div>
+            <div class="b" style="--h: 18%; --d: 1.0s"></div>
+            <div class="b" style="--h: 10%; --d: 1.1s"></div>
+            <div class="b" style="--h: 6%;  --d: 1.2s"></div>
+            <div class="b" style="--h: 3%;  --d: 1.3s"></div>
+          </div>
+        </div>
+
+        <!-- Kelly stake recommendation — slides in at the end of the loop -->
+        <div class="hv-stake">
+          <div>
+            <div class="hv-stake-lbl">★ HALF-KELLY STAKE</div>
+            <div class="hv-stake-sub">on $500 bankroll · 57% WR · 3.4× mult</div>
+          </div>
+          <div class="hv-stake-val">$58<span class="of"> /$500</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- METRICS STRIP -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-val"><span class="accent">10,000</span></div>
+        <div class="metric-lbl">Sims per slip</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val"><span class="amber">$14.99</span> <span class="metric-lbl mono" style="font-size:13px; letter-spacing:0;">/ month</span></div>
+        <div class="metric-lbl">Try it · 30-day pass</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val"><span class="green">$8.25</span> <span class="metric-lbl mono" style="font-size:13px; letter-spacing:0;">eq/mo</span></div>
+        <div class="metric-lbl">Annual · $99 / 365 days</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">$0</div>
+        <div class="metric-lbl">Card processor fees</div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         WHAT THE ANIMATION JUST SHOWED — three calm explanations of
+         the features the hero loop demonstrates. Text-only so the
+         page doesn't have two big animations competing for attention.
+         ============================================================ -->
+    <section class="section" id="how">
+      <div class="sec-head">
+        <div>
+          <div class="sec-num">01 / WHAT THE DEMO ABOVE IS DOING</div>
+          <h2>Three things every<br/>parlay tool <span class="amber">won't tell you.</span></h2>
+        </div>
+        <div class="sec-sub">The hero loops through the actual user flow. Here's the math behind each step — what we run, why it matters, and where the EV gain comes from.</div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>10,000 Monte Carlo sims</h3>
+          <p>For every slip, we sample 10K independent outcomes per leg and AND them. The output is a <strong>full win-rate distribution</strong>, not a single multiplier. You see if your 4.11× parlay has a 36% real win rate or a 9% one — same multiplier, very different bet.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Improve Odds rebalancer</h3>
+          <p>The simulator identifies which leg is dragging your win rate down. Click <strong>Improve Odds</strong> and we flip or drop it — recomputing the slip in real time. Typical lift on a weak leg: <strong>+15–25pp win rate</strong>. Polymarket doesn't surface this. Neither does any spreadsheet.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Half-Kelly bet sizing</h3>
+          <p>Given your win rate and combined multiplier, we solve <strong>f = (WR × (mult − 1) − loseRate) / (mult − 1)</strong>, halve for variance, and recommend a concrete stake against your bankroll. Most bettors eyeball this and overstake by 3–5×.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FEATURES
+         ============================================================ -->
+    <section class="section" id="features">
+      <div class="sec-head">
+        <div>
+          <div class="sec-num">02 / WHAT YOU GET</div>
+          <h2>Most of the value<br/>is free.</h2>
+        </div>
+        <div class="sec-sub">Pro unlocks the decision-making signals — Monte Carlo, Improve Odds, expected ROI, unlimited legs.</div>
+      </div>
+      <div class="features">
+        <div class="feat free">
+          <span class="tag">● FREE FOREVER</span>
+          <h3>Build + share, up to 3 legs</h3>
+          <p>Stack up to 3 Polymarket markets. Combined multiplier, "you'll actually get" payout, risk score, resolution dates — live.</p>
+          <ul>
+            <li>Floating + pill on every PM market page</li>
+            <li>Live YES/NO prices read from the page</li>
+            <li>Combined multiplier + honest leg-by-leg payout</li>
+            <li>Risk score, 24h volume, drift</li>
+            <li>1200×630 slip card download for X / Discord</li>
+          </ul>
+        </div>
+        <div class="feat pro">
+          <span class="tag">★ PRO · $14.99/MO OR $99/YR</span>
+          <h3>Monte Carlo + Improve Odds</h3>
+          <p>10K-iteration simulation. Real probability distribution. The algorithm finds your weakest leg and tells you whether to flip or drop it.</p>
+          <ul>
+            <li>10K Monte Carlo — full win-rate distribution</li>
+            <li>Improve Odds rebalancer (auto-flip or drop)</li>
+            <li>Expected ROI + 24h price drift</li>
+            <li>Unlimited legs (free is capped at 3)</li>
+            <li>Watermark-free slip cards</li>
+            <li>7-day free trial — no card required</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PRICING
+         ============================================================ -->
+    <section class="section" id="pricing">
+      <div class="sec-head">
+        <div>
+          <div class="sec-num">03 / PRICING</div>
+          <h2>Try it for $14.99.<br/>Or commit for <span class="amber">45% off.</span></h2>
+        </div>
+        <div class="sec-sub">No subscription. No payment processor. No card details. Send USDC on Polygon. Renew whenever — never auto-charged.</div>
+      </div>
+      <div class="pricing">
+        <div class="price-card free">
+          <div class="badge">● FREE FOREVER</div>
+          <div class="pamount"><strong>$0</strong><span class="unit">no card, no signup</span></div>
+          <div class="pmeta">Most users never need Pro.</div>
+          <ul>
+            <li>Up to 3 legs per slip</li>
+            <li>Floating + pill on every PM market</li>
+            <li>Live prices, multiplier, honest payout</li>
+            <li>Risk score, 24h volume, resolution dates</li>
+            <li>Shareable slip card downloads</li>
+          </ul>
+          <a class="pcta" href="#install">Install free →</a>
+        </div>
+        <div class="price-card pro">
+          <div class="badge">★ PRO · 30-DAY PASS</div>
+          <div class="pamount"><strong>$14.99</strong><span class="unit">USDC · 30 days · pay once</span></div>
+          <div class="pmeta">Lowest-friction way to try Pro on a real parlay. Pays for itself with one rebalanced slip. Renew when you want.</div>
+          <ul>
+            <li>Everything in Free</li>
+            <li>10K Monte Carlo simulation</li>
+            <li>Improve Odds auto-rebalancer</li>
+            <li>Expected ROI + 24h price drift</li>
+            <li>Unlimited legs</li>
+            <li>Watermark-free slip cards</li>
+          </ul>
+          <a class="pcta" href="/upgrade">Pay $14.99 →</a>
+        </div>
+        <div class="price-card pro pro-annual">
+          <div class="badge">★ PRO · 365-DAY PASS · 45% OFF</div>
+          <div class="pamount"><strong>$99</strong><span class="unit">USDC · 365 days · ≈$8.25/mo</span></div>
+          <div class="pmeta">For active bettors. 7-day free trial first. Set it and forget it — no auto-renewal, no card on file.</div>
+          <ul>
+            <li>Everything in 30-day pass</li>
+            <li>365 days of access from your tx</li>
+            <li>Best $/sim ratio</li>
+            <li>One on-chain payment, then quiet</li>
+            <li>Win-rate tracking across slips</li>
+            <li>Locks in early-adopter price</li>
+          </ul>
+          <a class="pcta" href="/upgrade">Start 7-day trial →</a>
+        </div>
+      </div>
+
+      <div class="disclaimer-strip">
+        <strong>Read this.</strong>
+        Polymarket pays each leg independently — there's no native "all-or-nothing" parlay contract.
+        Your real winnings = the sum of each leg that hits (what PolyParlay calls
+        <em>"You'll actually get"</em>). The combined multiplier is reference-only and only realises
+        if you execute as a true parlay through a third-party contract. PolyParlay analyses — it doesn't execute.
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INSTALL
+         ============================================================ -->
+    <section class="section" id="install">
+      <div class="install-block">
+        <a class="btn primary big-cta" id="installCta2" href="#">
+          Install from Chrome Web Store →
+        </a>
+        <div class="micro">CHROME ONLY · FIREFOX/EDGE PORT COMING</div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FOOTER
+         ============================================================ -->
+    <div class="footer">
+      <div>© 2026 POLYPARLAY · INFORMATION ONLY · NOT AFFILIATED WITH POLYMARKET</div>
+      <div class="links">
+        <a href="/privacy">PRIVACY</a>
+        <a href="/upgrade">PRO</a>
+        <a href="https://polymarket.com" target="_blank" rel="noopener">POLYMARKET ↗</a>
+      </div>
+    </div>
+
+    <script>
+      // Both install CTAs route to the CWS listing — placeholder until v1.0.30 published.
+      const CWS_URL = '#';  // TODO: replace with real CWS listing URL after approval
+      function bindInstall(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', (e) => {
+          if (CWS_URL === '#') {
+            e.preventDefault();
+            alert('PolyParlay is currently under Chrome Web Store review. The listing will be live within 1–3 business days.');
+          }
+        });
+        if (CWS_URL !== '#') el.href = CWS_URL;
+      }
+      bindInstall('installCta');
+      bindInstall('installCta2');
+    </script>
+  </body>
+</html>

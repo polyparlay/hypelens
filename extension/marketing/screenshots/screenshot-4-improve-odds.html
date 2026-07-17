@@ -1,0 +1,126 @@
+<!doctype html>
+<!-- CWS Screenshot 4 — Improve Odds before/after. 1280×800. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PolyParlay — Improve Odds</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_styles.css" />
+  <style>
+    body { width: 1280px; height: 800px; }
+    .frame { width: 1280px; height: 800px; padding: 60px 70px; display: flex; flex-direction: column; }
+    .head { text-align: center; margin-bottom: 36px; }
+    h1 { font-size: 56px; line-height: 1; font-weight: 900; letter-spacing: -0.04em; margin: 0 0 14px; }
+    h1 .accent { color: var(--accent); }
+    h1 .green { color: var(--green); }
+    .sub { font-size: 18px; color: var(--ink-2); margin: 0; max-width: 760px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+    .sub strong { color: var(--ink); font-weight: 800; }
+
+    .compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: stretch; flex: 1; }
+    .pane { background: var(--bg-2); border: 2px solid var(--ink); border-radius: 14px; padding: 26px; box-shadow: 5px 5px 0 var(--ink); display: flex; flex-direction: column; }
+    .pane.after { box-shadow: 6px 6px 0 var(--green); border-color: var(--green); }
+    .pane-tag { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
+    .pane.after .pane-tag { color: var(--green); }
+    .wr-big { font-family: 'JetBrains Mono', monospace; font-size: 64px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; color: var(--red); margin-bottom: 4px; }
+    .pane.after .wr-big { color: var(--green); }
+    .wr-sub { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 700; margin-bottom: 18px; }
+    .leg { background: white; border: 1.5px solid var(--ink); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; box-shadow: 2px 2px 0 var(--ink); }
+    .leg.weak { border-color: var(--red); box-shadow: 2px 2px 0 var(--red); background: #fef2f2; }
+    .leg.flipped { border-color: var(--green); box-shadow: 2px 2px 0 var(--green); background: #f0fdf4; }
+    .leg-q { font-size: 13.5px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .leg-meta { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted); margin-top: 3px; letter-spacing: 0.4px; }
+    .leg.weak .leg-meta { color: var(--red); font-weight: 800; }
+    .leg.flipped .leg-meta { color: var(--green); font-weight: 800; }
+    .leg-px { font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--ink); font-size: 15px; text-align: right; min-width: 56px; }
+    .leg.weak .leg-px { color: var(--red); }
+    .leg.flipped .leg-px { color: var(--green); }
+    .pane-foot { margin-top: auto; padding-top: 14px; border-top: 1px dashed rgba(10,12,20,0.18); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+    .pane-foot strong { color: var(--ink); font-weight: 900; font-size: 13px; }
+
+    .arrow-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+    .arrow-big { font-size: 64px; color: var(--accent); font-weight: 900; line-height: 1; }
+    .arrow-pill { background: var(--accent); color: white; padding: 12px 20px; border-radius: 9px; border: 1.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; text-align: center; text-transform: uppercase; }
+    .lift-pill { background: var(--green); color: white; padding: 10px 18px; border-radius: 8px; border: 1.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="head">
+      <h1>Improve Odds <span class="accent">finds your weak leg.</span><br/>And flips it — <span class="green">+21pp WR</span>.</h1>
+      <p class="sub">
+        One click. The algorithm searches every leg for the marginal contribution to joint EV,
+        finds the one dragging your win rate down, and recommends a flip or drop.
+      </p>
+    </div>
+    <div class="compare">
+      <div class="pane">
+        <div class="pane-tag">BEFORE</div>
+        <div class="wr-big">36%</div>
+        <div class="wr-sub">SIM WIN RATE · 10,000 RUNS</div>
+        <div class="leg">
+          <div>
+            <div class="leg-q">Fed cuts rates June 2026</div>
+            <div class="leg-meta">YES · RESOLVES 18 JUN</div>
+          </div>
+          <div class="leg-px">$0.62</div>
+        </div>
+        <div class="leg">
+          <div>
+            <div class="leg-q">Lakers over 102.5 vs Nuggets</div>
+            <div class="leg-meta">YES · RESOLVES TONIGHT</div>
+          </div>
+          <div class="leg-px">$0.61</div>
+        </div>
+        <div class="leg weak">
+          <div>
+            <div class="leg-q">BTC above $100K by May 31</div>
+            <div class="leg-meta">YES · WEAK LEG ⚠</div>
+          </div>
+          <div class="leg-px">$0.29</div>
+        </div>
+        <div class="pane-foot">
+          <span>Multiplier <strong>9.10×</strong></span>
+          <span>EV <strong style="color:var(--red);">−$8.20</strong></span>
+        </div>
+      </div>
+
+      <div class="arrow-col">
+        <div class="arrow-big">→</div>
+        <div class="arrow-pill">↗ Improve Odds</div>
+        <div class="lift-pill">+21pp</div>
+      </div>
+
+      <div class="pane after">
+        <div class="pane-tag">AFTER · 1 CLICK</div>
+        <div class="wr-big">57%</div>
+        <div class="wr-sub">SIM WIN RATE · 10,000 RUNS</div>
+        <div class="leg">
+          <div>
+            <div class="leg-q">Fed cuts rates June 2026</div>
+            <div class="leg-meta">YES · RESOLVES 18 JUN</div>
+          </div>
+          <div class="leg-px">$0.62</div>
+        </div>
+        <div class="leg">
+          <div>
+            <div class="leg-q">Lakers over 102.5 vs Nuggets</div>
+            <div class="leg-meta">YES · RESOLVES TONIGHT</div>
+          </div>
+          <div class="leg-px">$0.61</div>
+        </div>
+        <div class="leg flipped">
+          <div>
+            <div class="leg-q">BTC ≤ $100K by May 31</div>
+            <div class="leg-meta">NO · FLIPPED ✓</div>
+          </div>
+          <div class="leg-px">$0.71</div>
+        </div>
+        <div class="pane-foot">
+          <span>Multiplier <strong>3.41×</strong></span>
+          <span>EV <strong style="color:var(--green);">+$5.74</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- 48×48 — native render for the extensions list / context menu sizes. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 48px; height: 48px; }
+    .tile {
+      width: 48px; height: 48px;
+      background: #fbbf24;
+      border: 2px solid #0a0c14;
+      display: flex; align-items: center; justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-weight: 900;
+      font-size: 30px;
+      letter-spacing: -3.5px;
+      line-height: 1;
+    }
+    .tile .p1 { color: #4f46e5; }
+    .tile .p2 { color: #0a0c14; }
+  </style>
+</head>
+<body>
+  <div class="tile"><span class="p1">P</span><span class="p2">P</span></div>
+</body>
+</html>

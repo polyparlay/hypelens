@@ -1,0 +1,111 @@
+<!doctype html>
+<!-- CWS Screenshot 1 — Hero value-prop. 1280×800. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PolyParlay — Hero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_styles.css" />
+  <style>
+    body { width: 1280px; height: 800px; }
+    .frame { width: 1280px; height: 800px; display: grid; grid-template-columns: 1.15fr 1fr; align-items: center; gap: 50px; padding: 70px 70px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; background: var(--bg-2); border: 1.5px solid var(--ink); padding: 8px 14px; border-radius: 6px; box-shadow: 3px 3px 0 var(--ink); margin-bottom: 26px; }
+    .eyebrow .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+    h1 { font-size: 72px; line-height: 0.98; font-weight: 900; letter-spacing: -0.04em; margin: 0 0 24px; }
+    h1 .amber { color: var(--amber-dk); }
+    h1 .accent { color: var(--accent); }
+    .lede { font-size: 21px; line-height: 1.5; color: var(--ink-2); margin: 0 0 28px; max-width: 580px; }
+    .lede strong { color: var(--ink); font-weight: 800; }
+    .pills { display: flex; gap: 12px; flex-wrap: wrap; }
+    .pill { background: var(--ink); color: var(--bg); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; padding: 9px 14px; border-radius: 7px; border: 1.5px solid var(--ink); box-shadow: 3px 3px 0 var(--amber); }
+    .pill.amber { background: var(--amber); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+    .pill.green { background: var(--green); color: white; box-shadow: 3px 3px 0 var(--ink); }
+
+    /* Popup mock */
+    .popup { background: var(--bg-2); border: 2px solid var(--ink); border-radius: 16px; padding: 22px 22px 26px; box-shadow: 8px 8px 0 var(--ink); width: 100%; max-width: 460px; justify-self: center; }
+    .pp-head { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; color: var(--accent); padding: 0 4px 12px; border-bottom: 1.5px dashed var(--ink); margin-bottom: 14px; }
+    .pp-pro { color: var(--ink); background: var(--amber); padding: 4px 9px; border: 1.5px solid var(--ink); border-radius: 6px; font-size: 10px; box-shadow: 2px 2px 0 var(--ink); }
+    .leg { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px 13px; background: white; border: 1.5px solid var(--ink); border-radius: 8px; margin-bottom: 7px; align-items: center; box-shadow: 2px 2px 0 var(--ink); }
+    .leg-q { color: var(--ink); font-weight: 700; font-size: 13.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .leg-meta { color: var(--muted); font-size: 10.5px; font-family: 'JetBrains Mono', monospace; margin-top: 3px; letter-spacing: 0.4px; }
+    .leg-meta .yes { color: var(--green); font-weight: 800; }
+    .leg-meta .no  { color: var(--red); font-weight: 800; }
+    .leg-price { font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--ink); font-size: 15px; text-align: right; min-width: 56px; }
+    .leg.flipped { border-color: var(--green); box-shadow: 2px 2px 0 var(--green); }
+    .sim { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; padding: 12px 14px; margin-top: 10px; background: var(--ink); color: var(--bg); border-radius: 9px; box-shadow: 3px 3px 0 var(--amber); }
+    .sim-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 1.6px; color: var(--amber); text-transform: uppercase; margin-bottom: 4px; font-weight: 800; }
+    .wr { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; color: #86efac; display: flex; align-items: baseline; gap: 6px; }
+    .wr small { font-size: 11px; color: #9ca3af; font-weight: 600; letter-spacing: 0.8px; }
+    .pp { background: var(--green); color: #022; font-size: 10.5px; padding: 2px 6px; border-radius: 3px; font-weight: 800; }
+    .histo { display: grid; grid-template-columns: repeat(14, 1fr); align-items: end; gap: 2px; height: 38px; }
+    .histo .b { background: var(--amber); border-radius: 1px; }
+    .stake { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; margin-top: 10px; background: var(--amber); border: 1.5px solid var(--ink); border-radius: 9px; box-shadow: 3px 3px 0 var(--ink); }
+    .stake-lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.6px; color: var(--ink); text-transform: uppercase; font-weight: 800; margin-bottom: 3px; }
+    .stake-sub { font-size: 11px; color: var(--ink-2); font-family: 'JetBrains Mono', monospace; }
+    .stake-val { font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 900; color: var(--ink); letter-spacing: -0.03em; line-height: 1; }
+    .stake-val .of { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> POLYPARLAY · CHROME EXTENSION</div>
+      <h1>Win rate <span class="amber">+21pp</span><br/>in one click.</h1>
+      <p class="lede">
+        Standard parlay tools <strong>multiply prices</strong>. PolyParlay runs
+        <strong>10,000 Monte Carlo sims</strong>, flips your weakest leg, and computes
+        <strong>Kelly bet size</strong> — automatically. For Polymarket.
+      </p>
+      <div class="pills">
+        <span class="pill green">FREE up to 3 legs</span>
+        <span class="pill amber">$14.99/mo or $99/yr Pro</span>
+        <span class="pill">No wallet connect</span>
+      </div>
+    </div>
+
+    <div class="popup">
+      <div class="pp-head">
+        <span>// POLYPARLAY · 03 LEGS</span>
+        <span class="pp-pro">PRO</span>
+      </div>
+      <div class="leg">
+        <div>
+          <div class="leg-q">Fed cuts rates June 2026</div>
+          <div class="leg-meta"><span class="yes">YES</span> · RESOLVES 18 JUN</div>
+        </div>
+        <div class="leg-price">$0.62</div>
+      </div>
+      <div class="leg">
+        <div>
+          <div class="leg-q">Lakers over 102.5 vs Nuggets</div>
+          <div class="leg-meta"><span class="yes">YES</span> · RESOLVES TONIGHT</div>
+        </div>
+        <div class="leg-price">$0.61</div>
+      </div>
+      <div class="leg flipped">
+        <div>
+          <div class="leg-q">BTC ≤ $100K by May 31</div>
+          <div class="leg-meta" style="color:var(--green); font-weight:800;">NO · FLIPPED ✓</div>
+        </div>
+        <div class="leg-price" style="color:var(--green);">$0.71</div>
+      </div>
+      <div class="sim">
+        <div>
+          <div class="sim-label">// 10K MC</div>
+          <div class="wr">57% <small>WR</small> <span class="pp">+21pp</span></div>
+        </div>
+        <div class="histo">
+          <div class="b" style="height: 18%"></div><div class="b" style="height: 32%"></div><div class="b" style="height: 54%"></div><div class="b" style="height: 78%"></div><div class="b" style="height: 92%"></div><div class="b" style="height: 100%"></div><div class="b" style="height: 88%"></div><div class="b" style="height: 64%"></div><div class="b" style="height: 42%"></div><div class="b" style="height: 28%"></div><div class="b" style="height: 18%"></div><div class="b" style="height: 10%"></div><div class="b" style="height: 6%"></div><div class="b" style="height: 3%"></div>
+        </div>
+      </div>
+      <div class="stake">
+        <div>
+          <div class="stake-lbl">★ HALF-KELLY STAKE</div>
+          <div class="stake-sub">$500 bankroll · 57% WR · 3.4× mult</div>
+        </div>
+        <div class="stake-val">$58<span class="of"> /$500</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

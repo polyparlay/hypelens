@@ -1,0 +1,33 @@
+/* HypeLens toolbar-popup shell. HUD internals (.hlx-*) come from content.css;
+   this styles the popup frame to match the web3 glass window. */
+* { box-sizing: border-box; }
+body {
+  width: 400px; margin: 0;
+  background: radial-gradient(120% 80% at 50% -10%, rgba(79,255,212,0.06), transparent 55%), var(--hlx-bg, #0a0f11);
+  color: var(--hlx-text, #d7e3e3);
+  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-size: 12px;
+}
+header {
+  display: flex; align-items: center; gap: 8px; padding: 11px 14px;
+  border-bottom: 1px solid var(--hlx-border2, rgba(255,255,255,0.05));
+}
+.brand { display: flex; align-items: center; gap: 7px; font: 800 14px/1 var(--sans); }
+.brand { background: linear-gradient(90deg, var(--hlx-mint-bright, #4affd4), var(--hlx-mint, #4fd6c4)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--hlx-mint-bright, #4affd4); box-shadow: 0 0 10px rgba(79,255,212,0.9); -webkit-text-fill-color: initial; }
+#coinSel {
+  margin-left: auto; background: rgba(0,0,0,0.3); color: var(--hlx-text, #d7e3e3);
+  border: 1px solid var(--hlx-border, rgba(255,255,255,0.08)); border-radius: 8px; padding: 5px 8px;
+  font: 700 12px/1 var(--mono, ui-monospace, Menlo, monospace); outline: none; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+}
+#coinSel:focus { border-color: var(--hlx-mint, #4fd6c4); box-shadow: 0 0 12px rgba(79,255,212,0.35); }
+.pop-refresh {
+  background: rgba(0,0,0,0.3); border: 1px solid var(--hlx-border, rgba(255,255,255,0.08)); border-radius: 8px;
+  color: var(--hlx-dim, #7f9498); width: 28px; height: 28px; font-size: 14px; cursor: pointer; transition: all 0.15s;
+}
+.pop-refresh:hover { border-color: var(--hlx-mint, #4fd6c4); color: var(--hlx-mint, #4fd6c4); box-shadow: 0 0 12px rgba(79,255,212,0.3); }
+
+#hud { display: flex; flex-direction: column; }
+#hud .hlx-win-head { cursor: default; }
+
+.pop-note { padding: 10px 14px 14px; font: 400 10px/1.5 var(--sans); color: var(--hlx-dim, #7f9498); border-top: 1px solid var(--hlx-border2, rgba(255,255,255,0.05)); }

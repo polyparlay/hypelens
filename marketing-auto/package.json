@@ -1,0 +1,17 @@
+{
+  "name": "polyparlay-marketing-auto",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Autonomous PolyParlay marketing — content gen + X auto-poster",
+  "scripts": {
+    "generate": "node generate-content.mjs",
+    "post": "node x-poster.mjs",
+    "post:dry": "node x-poster.mjs --dry",
+    "post:force": "node x-poster.mjs --force"
+  },
+  "dependencies": {
+    "twitter-api-v2": "^1.18.0",
+    "dotenv": "^16.4.0"
+  }
+}

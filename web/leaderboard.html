@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PolyParlay leaderboard — top realized parlays</title>
+    <meta name="description" content="The top-ROI Polymarket parlays from PolyParlay users this week. Real bets, real outcomes." />
+    <meta property="og:title" content="PolyParlay leaderboard" />
+    <meta property="og:description" content="Top-ROI realized Polymarket parlays. Real bets. Real outcomes." />
+    <meta property="og:image" content="https://polyparlay.app/og-default.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f5f1e8; --bg-2: #fdfcf7; --ink: #0a0c14; --ink-2: #1f2937;
+        --muted: #6b6f7a; --accent: #4f46e5; --amber: #fbbf24;
+        --green: #16a34a; --red: #dc2626;
+        --shadow-md: 4px 4px 0 var(--ink);
+        --shadow-sm: 3px 3px 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: var(--ink);
+        background: var(--bg);
+        background-image: radial-gradient(circle at 1px 1px, rgba(10,12,20,0.08) 1px, transparent 0);
+        background-size: 22px 22px;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
+      .nav { max-width: 920px; margin: 0 auto; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; }
+      .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; color: var(--ink); text-decoration: none; font-size: 17px; letter-spacing: -0.01em; }
+      .brand-mark { width: 40px; height: 40px; border-radius: 8px; background: var(--ink); border: 1.5px solid var(--ink); display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: -2px; box-shadow: var(--shadow-sm); }
+      .brand-mark .p1 { color: var(--accent); }
+      .brand-mark .p2 { color: var(--amber); }
+      .nav .install { background: var(--ink); color: var(--bg); text-decoration: none; padding: 10px 16px; border-radius: 8px; border: 1.5px solid var(--ink); font-weight: 800; font-size: 13px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; box-shadow: var(--shadow-sm); }
+
+      .wrap { max-width: 920px; margin: 0 auto; padding: 22px 24px 80px; }
+      .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: var(--bg-2); border: 1.5px solid var(--ink); padding: 6px 12px; border-radius: 6px; box-shadow: var(--shadow-sm); margin-bottom: 18px; }
+      .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: p 1.4s ease-in-out infinite; }
+      @keyframes p { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+      h1 { font-size: clamp(40px, 5vw, 60px); line-height: 1; font-weight: 900; letter-spacing: -0.04em; margin: 0 0 14px; }
+      h1 .amber { color: #b45309; }
+      .lede { font-size: 17px; color: var(--ink-2); margin: 0 0 32px; max-width: 640px; line-height: 1.5; }
+      .lede strong { color: var(--ink); font-weight: 800; }
+
+      .tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+      .tab { padding: 8px 14px; border: 1.5px solid var(--ink); border-radius: 7px; background: var(--bg-2); font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase; box-shadow: 2px 2px 0 var(--ink); }
+      .tab.active { background: var(--amber); }
+
+      .entries { display: grid; gap: 12px; }
+      .entry { background: var(--bg-2); border: 1.5px solid var(--ink); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow-md); display: grid; grid-template-columns: 36px 1fr auto; gap: 14px; align-items: center; }
+      .rank { font-family: 'JetBrains Mono', monospace; font-weight: 900; font-size: 20px; color: var(--ink); line-height: 1; }
+      .entry .body { min-width: 0; }
+      .entry-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 4px; }
+      .handle { font-weight: 800; color: var(--ink); font-size: 15px; }
+      .meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.4px; }
+      .legs-line { font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .legs-line .side { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11px; }
+      .legs-line .side.yes { color: var(--green); }
+      .legs-line .side.no  { color: var(--red); }
+      .stats { display: flex; gap: 14px; align-items: center; }
+      .stat { text-align: right; min-width: 80px; }
+      .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1.4px; color: var(--muted); text-transform: uppercase; }
+      .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 900; letter-spacing: -0.02em; color: var(--ink); }
+      .stat-value.pos { color: var(--green); }
+      .stat-value.neg { color: var(--red); }
+      .stat-value.amber { color: var(--amber); }
+      .status-pill { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 800; letter-spacing: 0.6px; padding: 3px 7px; border-radius: 4px; border: 1.5px solid var(--ink); background: var(--bg); }
+      .status-pill.won { background: var(--green); color: white; }
+      .status-pill.lost { background: var(--red); color: white; }
+      .status-pill.pending { background: var(--bg); color: var(--ink); }
+
+      .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+      .empty strong { display: block; color: var(--ink); font-weight: 900; font-size: 20px; letter-spacing: -0.02em; margin-bottom: 8px; }
+
+      .install-cta { margin-top: 32px; background: var(--ink); color: var(--bg); border-radius: 14px; padding: 26px 28px; text-align: center; box-shadow: 6px 6px 0 var(--amber); }
+      .install-cta h3 { margin: 0 0 8px; font-size: 22px; font-weight: 900; color: var(--bg); letter-spacing: -0.02em; }
+      .install-cta p { color: #d1d5db; font-size: 14px; margin: 0 0 16px; }
+      .install-cta a { background: var(--amber); color: var(--ink); text-decoration: none; padding: 12px 22px; border-radius: 8px; font-weight: 900; font-size: 14px; border: 1.5px solid var(--ink); box-shadow: 3px 3px 0 var(--bg); display: inline-block; }
+    </style>
+  </head>
+  <body>
+    <nav class="nav">
+      <a class="brand" href="/"><span class="brand-mark"><span class="p1">P</span><span class="p2">P</span></span>PolyParlay</a>
+      <a class="install" href="/" >INSTALL →</a>
+    </nav>
+    <div class="wrap">
+      <div class="eyebrow"><span class="dot"></span> LIVE LEADERBOARD</div>
+      <h1>Real bets. Real outcomes.<br/><span class="amber">Top-ROI</span> Polymarket parlays.</h1>
+      <p class="lede">
+        Each entry is a parlay <strong>actually placed</strong> by a PolyParlay user, then resolved on Polymarket.
+        Sorted by realized ROI — the best per-dollar returns at the top. Hit install and your own slips can show up here.
+      </p>
+
+      <div class="tabs">
+        <button class="tab active" data-sort="roi">★ TOP ROI</button>
+        <button class="tab" data-sort="recent">↻ RECENT</button>
+      </div>
+
+      <main id="entries" class="entries">
+        <div class="empty">Loading…</div>
+      </main>
+
+      <div class="install-cta">
+        <h3>Your slip could rank here.</h3>
+        <p>Install PolyParlay (Chrome), build a parlay, save it, mark won/lost when it resolves, and tap "Publish."</p>
+        <a href="/">Install free →</a>
+      </div>
+    </div>
+
+    <script>
+      const API = 'https://polyparlay-verify.z-lew87.workers.dev';
+      function fmt$(n) { if (n == null || isNaN(n)) return '—'; const a = Math.abs(n); const s = n >= 0 ? '+' : '−'; return s + '$' + a.toFixed(2); }
+      function fmtRoiPct(roi) { if (roi == null || isNaN(roi)) return '—'; const s = roi >= 0 ? '+' : ''; return s + (roi * 100).toFixed(0) + '%'; }
+      function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+      async function load(sort = 'roi') {
+        const main = document.getElementById('entries');
+        main.innerHTML = '<div class="empty">Loading…</div>';
+        try {
+          const r = await fetch(`${API}/leaderboard/top?sort=${encodeURIComponent(sort)}&limit=25`);
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const data = await r.json();
+          if (!data.ok || !data.entries || !data.entries.length) {
+            main.innerHTML = '<div class="empty"><strong>No slips yet</strong>Be the first. Install the extension, save a parlay, resolve it, publish.</div>';
+            return;
+          }
+          main.innerHTML = data.entries.map((e, i) => {
+            const isResolved = e.status === 'won' || e.status === 'lost';
+            const roi = isResolved ? (e.pnl || 0) / Math.max(e.stake, 1) : null;
+            const pnlClass = !isResolved ? 'amber' : (e.pnl >= 0 ? 'pos' : 'neg');
+            const legsLine = e.legs.map(l => {
+              const cls = l.side.toUpperCase().startsWith('Y') ? 'yes' : 'no';
+              return `<span class="side ${cls}">${esc(l.side)}</span> ${esc(l.q)}`;
+            }).join(' · ');
+            return `<div class="entry">
+              <div class="rank">#${i + 1}</div>
+              <div class="body">
+                <div class="entry-head">
+                  <span class="handle">${esc(e.handle === 'anon' ? 'Anonymous' : '@' + e.handle)}</span>
+                  <span class="meta">${e.legs.length} legs · ${(e.winRate * 100).toFixed(0)}% sim WR · ${e.multiplier.toFixed(2)}×</span>
+                </div>
+                <div class="legs-line">${legsLine}</div>
+              </div>
+              <div class="stats">
+                <div class="stat">
+                  <div class="stat-label">P&L</div>
+                  <div class="stat-value ${pnlClass}">${isResolved ? fmt$(e.pnl) : 'pending'}</div>
+                </div>
+                <span class="status-pill ${e.status}">${e.status.toUpperCase()}</span>
+              </div>
+            </div>`;
+          }).join('');
+        } catch (err) {
+          main.innerHTML = `<div class="empty"><strong>Couldn't load leaderboard</strong>${esc(err.message)} — try again in a moment.</div>`;
+        }
+      }
+      document.querySelectorAll('.tab').forEach(t => {
+        t.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+          load(t.getAttribute('data-sort'));
+        });
+      });
+      load('roi');
+    </script>
+  </body>
+</html>

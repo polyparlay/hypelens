@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  PolyParlay X auto-poster — macOS launchd schedule.
+
+  Install:
+    cp marketing-auto/app.polyparlay.x-poster.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/app.polyparlay.x-poster.plist
+
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/app.polyparlay.x-poster.plist
+    rm ~/Library/LaunchAgents/app.polyparlay.x-poster.plist
+
+  Fires every 4 hours while the Mac is awake. Will skip its own attempt if the
+  internal MIN_HOURS_BETWEEN_POSTS guard (3.5h) says it's too soon — safe even
+  if cron double-fires.
+
+  Logs:
+    ~/Library/Logs/polyparlay-x-poster.log
+    marketing-auto/.post-log.jsonl (structured)
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>app.polyparlay.x-poster</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <!-- IMPORTANT: replace /Users/clawdlawd/polyparlay with your actual path
+         if different (run `pwd` from your project root). -->
+    <string>/usr/local/bin/node</string>
+    <string>/Users/clawdlawd/polyparlay/marketing-auto/x-poster.mjs</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/clawdlawd/polyparlay/marketing-auto</string>
+
+  <!-- Every 4 hours. launchd fires when Mac is awake; if asleep at firing time
+       it runs on wake. The MIN_HOURS_BETWEEN_POSTS internal guard prevents
+       spam if multiple skipped fires queue up. -->
+  <key>StartInterval</key>
+  <integer>14400</integer>
+
+  <!-- Run once at load too (immediate first post). Remove this key if you
+       want the first post to wait the full interval. -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- Pipe stdout/stderr to a rolling log so launchd-fired output is
+       captured (otherwise it vanishes). -->
+  <key>StandardOutPath</key>
+  <string>/Users/clawdlawd/Library/Logs/polyparlay-x-poster.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/clawdlawd/Library/Logs/polyparlay-x-poster.log</string>
+
+  <!-- Inherit PATH so /usr/local/bin/node + system fetch work; without this,
+       launchd starts with a minimal PATH and node may not be found. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+  </dict>
+</dict>
+</plist>
