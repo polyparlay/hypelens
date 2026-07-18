@@ -1,5 +1,5 @@
-# Cascade/magnet calibration — 2026-07-17T05:15
-Prereg sha256 cb8c5add8ba8… · snapshots 398 · scored 225
+# Cascade/magnet calibration — 2026-07-18T01:15
+Prereg sha256 cb8c5add8ba8… · snapshots 589 · scored 348
 
 ## H1 magnet (wall ≥$10M within 1.5%) — n=0 — **below n gate (100), NO CLAIMS**
 touch magnet 24h: 0/0 (Wilson 0–100%)

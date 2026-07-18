@@ -57,20 +57,26 @@ const PREDICTED_TTL_MS = 5 * 60 * 1000; // predicted fundings move slowly
 // 150×weight2 = 300 vs 1200/min budget. No placeholder, no external host.
 const WHALE_TTL_MS = 3 * 60 * 1000;
 const WHALE_CONCURRENCY = 9;
+const CRAWL_CHUNK = 25;               // wallets per message-event invocation (SW-lifetime safe)
+const CRAWL_MIN_PARTIAL = 50;         // ≥N wallets crawled → prefer live-partial over bundled
+const CRAWL_PASS_MAX_AGE_MS = 30 * 60 * 1000;  // a pass older than this restarts
 let whaleList = null;                 // [addr,...]
-let whaleSnapshot = null;             // { at, byCoin: { COIN: [{szi, liqPx, posVal}] } }
-let whaleInflight = null;
+let whaleSnapshot = null;             // { at, byCoin, n, done, complete }
+let crawlStateMem = null;             // in-progress pass (also persisted per chunk)
+let crawlBusy = false;
 
-// Bundled REAL liquidation levels (top-2000 wallets snapshot, generated
-// offline) = the instant-load profile shown before the live whale crawl
-// finishes. Shape: { coins: { COIN: { mark, levels: [[liqPx, notional, side]] } } }.
+// Bundled REAL liquidation levels (top-wallets snapshot, generated offline) =
+// the instant-load profile shown before the live whale crawl covers the coin.
+// Shape: { updated, coins: { COIN: { mark, levels: [[liqPx, notional, side]] } } }.
 let realLiqBundle = null;
+let realLiqUpdated = null;            // ISO date the bundle was generated (staleness honesty)
 async function loadRealLiq() {
   if (realLiqBundle) return realLiqBundle;
   try {
     const r = await fetch(chrome.runtime.getURL('data/real_liq.json'));
     const j = await r.json();
     realLiqBundle = (j && j.coins) ? j.coins : {};
+    realLiqUpdated = (j && j.updated) || null;
   } catch { realLiqBundle = {}; }
   return realLiqBundle;
 }
@@ -314,43 +320,68 @@ async function rehydrateWhaleSnapshot() {
   try {
     const o = await chrome.storage.session.get([WHALE_SNAP_KEY]);
     const s = o && o[WHALE_SNAP_KEY];
-    if (s && s.byCoin && Date.now() - s.at < WHALE_TTL_MS * 3) whaleSnapshot = s;
+    // accept a persisted snapshot for a longer window (a fresh pass replaces it
+    // incrementally); still bounded so a browser-session-old crawl can't linger.
+    if (s && s.byCoin && Date.now() - s.at < WHALE_TTL_MS * 10) whaleSnapshot = s;
   } catch (e) {}
   return whaleSnapshot;
 }
 
-// Fan out clearinghouseState for all whales; index open perp positions by coin.
-async function refreshWhales() {
-  await rehydrateWhaleSnapshot();
-  if (whaleSnapshot && Date.now() - whaleSnapshot.at < WHALE_TTL_MS) return whaleSnapshot;
-  if (whaleInflight) return whaleInflight;
-  whaleInflight = (async () => {
-    const list = await loadWhales();
-    const byCoin = {}; let done = 0, published = false;
-    const publish = () => { whaleSnapshot = { at: Date.now(), byCoin, n: list.length, done }; published = true; persistWhaleSnapshot(); };
-    // Publish whatever we have by a hard deadline so the UI never sticks on
-    // "loading" — it only feeds the top Market Lean bar; more fills in after.
-    const deadline = setTimeout(() => { if (done > 0) publish(); }, 10000);
-    await mapLimit(list, WHALE_CONCURRENCY, async (w) => {
-      const st = await withTimeout(postInfo({ type: 'clearinghouseState', user: w.a }), 6000);
-      done++;
-      if (st && st.assetPositions) {
+// ---- INCREMENTAL RESUMABLE CRAWL (v0.21.1 root-cause fix) ----
+// The old refreshWhales() ran mapLimit over ALL 300 wallets in one async task:
+// MV3 kills the idle SW ~30s after the triggering message resolves, so the
+// crawl DIED partway, every TTL expiry RESTARTED it from wallet #0, and most
+// coins never reached the 12-live-level bar → bundled fossil served as "real".
+// Now: each incoming message advances ONE ~25-wallet chunk (seconds, safely
+// inside the SW lifetime), persisting the cursor + accumulated per-wallet rows
+// to chrome.storage.session after EVERY chunk — a full pass completes across
+// many SW wakeups. Snapshot published progressively (≥50 wallets → live-partial
+// preferred over bundled); `complete:true` only after the full pass.
+const CRAWL_STATE_KEY = 'whaleCrawlState';
+function persistCrawlState(st) {
+  try { const p = st ? chrome.storage.session.set({ [CRAWL_STATE_KEY]: st }) : chrome.storage.session.remove([CRAWL_STATE_KEY]); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+}
+async function loadCrawlState() {
+  if (crawlStateMem) return crawlStateMem;
+  try { const o = await chrome.storage.session.get([CRAWL_STATE_KEY]); crawlStateMem = (o && o[CRAWL_STATE_KEY]) || null; } catch (e) {}
+  return crawlStateMem;
+}
+async function advanceWhaleCrawl() {
+  if (crawlBusy) return; crawlBusy = true;
+  try {
+    await rehydrateWhaleSnapshot();
+    // a COMPLETE snapshot fresher than the TTL → nothing to do this tick
+    if (whaleSnapshot && whaleSnapshot.complete && Date.now() - whaleSnapshot.at < WHALE_TTL_MS) return;
+    const list = await loadWhales(); if (!list.length) return;
+    let st = await loadCrawlState();
+    if (!st || st.listLen !== list.length || st.cursor >= list.length ||
+        Date.now() - (st.startedAt || 0) > CRAWL_PASS_MAX_AGE_MS) {
+      st = { cursor: 0, listLen: list.length, byCoin: {}, startedAt: Date.now() };   // new pass
+    }
+    const chunk = list.slice(st.cursor, st.cursor + CRAWL_CHUNK);
+    await mapLimit(chunk, WHALE_CONCURRENCY, async (w) => {
+      const cs = await withTimeout(postInfo({ type: 'clearinghouseState', user: w.a }), 6000);
+      if (cs && cs.assetPositions) {
         // account value feeds the ADL index denominator (notional/account_value)
-        const acctVal = st.marginSummary ? num(st.marginSummary.accountValue) : null;
-        for (const ap of st.assetPositions) {
+        const acctVal = cs.marginSummary ? num(cs.marginSummary.accountValue) : null;
+        for (const ap of cs.assetPositions) {
           const p = ap.position || {}; const szi = num(p.szi), posVal = num(p.positionValue);
           if (!p.coin || szi == null || szi === 0 || posVal == null) continue;
-          (byCoin[p.coin] || (byCoin[p.coin] = [])).push({ szi, liqPx: num(p.liquidationPx), posVal, addr: w.a, pnl: w.pnl,
+          (st.byCoin[p.coin] || (st.byCoin[p.coin] = [])).push({ szi, liqPx: num(p.liquidationPx), posVal, addr: w.a, pnl: w.pnl,
             entryPx: num(p.entryPx), acctVal });   // + ADL-index inputs (entry, account value)
         }
       }
-      if (!published && done >= 60) publish();   // enough sample → resolve loading early
     });
-    clearTimeout(deadline);
-    publish();   // final, complete snapshot
-    return whaleSnapshot;
-  })().finally(() => { whaleInflight = null; });
-  return whaleInflight;
+    st.cursor += chunk.length;
+    const complete = st.cursor >= list.length;
+    // progressive publish: partial data beats a 12-day-old bundle once ≥50 wallets
+    if (complete || st.cursor >= CRAWL_MIN_PARTIAL) {
+      whaleSnapshot = { at: Date.now(), byCoin: st.byCoin, n: list.length, done: st.cursor, complete };
+      persistWhaleSnapshot();
+    }
+    if (complete) { crawlStateMem = null; persistCrawlState(null); }
+    else { crawlStateMem = st; persistCrawlState(st); }
+  } catch (e) {} finally { crawlBusy = false; }
 }
 function shortAddr(a) { return a && a.length > 12 ? a.slice(0, 6) + '…' + a.slice(-4) : a; }
 
@@ -397,25 +428,33 @@ async function getCoinIntel(coin, mark) {
   if (!coin) return { ok: true, loading: true };
   await loadRealLiq();                              // bundled instant-load data
   await rehydrateWhaleSnapshot();                   // SW may have restarted — reuse persisted crawl
-  // ensure a live refresh is running / fresh; upgrades on the next poll
-  const haveSnap = whaleSnapshot && Date.now() - whaleSnapshot.at < WHALE_TTL_MS;
-  if (!haveSnap) { refreshWhales().catch(() => {}); }   // fire-and-forget, never an unhandled rejection
-  const live = computeCoinIntel(coin, mark);         // null until first snapshot
+  advanceWhaleCrawl().catch(() => {});              // every message advances one chunk
+  const live = computeCoinIntel(coin, mark);         // null until first (partial) snapshot
   const liveLevels = live ? (live.positions || []).map((p) => ({ price: p.price, sizeUsd: p.sizeUsd, side: p.side })) : [];
+  const snapDone = whaleSnapshot ? (whaleSnapshot.done || 0) : 0;
+  const snapTotal = whaleSnapshot ? (whaleSnapshot.n || 0) : ((whaleList && whaleList.length) || 0);
+  const snapComplete = Boolean(whaleSnapshot && whaleSnapshot.complete);
   if (live && liveLevels.length >= 12) {             // enough live sample → use it
-    return { ok: true, loading: false, ...live, levels: liveLevels, levelsSource: 'live',
-      coverage: { note: 'real positions · top ' + (live.nWhales || 300) + ' wallets (live)' } };
+    // HONESTY: 'live' ONLY when the crawl pass is COMPLETE; while a pass is in
+    // progress the data is labeled live-partial with its wallet coverage.
+    const src = snapComplete ? 'live' : 'live-partial';
+    return { ok: true, loading: false, ...live, levels: liveLevels, levelsSource: src,
+      crawl: { done: snapDone, total: snapTotal, complete: snapComplete },
+      coverage: { note: snapComplete ? 'real positions · top ' + (live.nWhales || snapTotal) + ' wallets (live)' : 'live · ' + snapDone + ' of ' + snapTotal + ' wallets' } };
   }
   // Fall back to the bundled REAL snapshot — ALWAYS resolves, NEVER stuck on
-  // "loading" (the lean bar + heat get real data instantly; live upgrades later).
-  // nWhales = the ACTUAL wallet count (snapshot n, else the crawl list length) —
-  // never a hardcoded number.
-  const nWhales = (whaleSnapshot && whaleSnapshot.n) || (whaleList && whaleList.length) || 0;
+  // "loading". STALENESS HONESTY (v0.21.1): the bundle is an offline snapshot,
+  // NOT live data — label it with its generation date so the UI can badge it
+  // amber/stale instead of claiming "real positions".
+  const nWhales = snapTotal || 0;
   const bun = bundleIntel(coin, mark);
+  const ageMs = realLiqUpdated ? Date.now() - Date.parse(realLiqUpdated) : null;
+  const stale = ageMs == null ? true : ageMs > 24 * 3600 * 1000;
   return { ok: true, loading: false, coin, walls: bun.walls, smartMoney: bun.smartMoney,
     positions: bun.levels.slice(0, 500).map((l) => ({ price: l.price, sizeUsd: l.sizeUsd, side: l.side, addr: '', pnl: 0 })),
-    levels: bun.levels, levelsSource: 'bundled', nWhales,
-    coverage: { note: 'real positions · top wallets (snapshot)' } };
+    levels: bun.levels, levelsSource: 'bundled', bundleUpdated: realLiqUpdated, bundleStale: stale, nWhales,
+    crawl: { done: snapDone, total: snapTotal, complete: snapComplete },
+    coverage: { note: 'snapshot ' + (realLiqUpdated ? realLiqUpdated.slice(0, 10) : 'undated') + (stale ? ' · STALE' : '') + ' — live crawl in progress' } };
 }
 
 // -------- ADL EXPOSURE (estimated · profit×leverage rank) --------
@@ -441,7 +480,7 @@ async function getAdlRank(q) {
   // position is effectively not in the queue.
   if (user.profitRatio <= 1) return { ok: true, source: 'proxy', eligible: false, tier: 'none', n: 0 };
   const snap = whaleSnapshot;
-  if (!snap) { refreshWhales().catch(() => {}); return { ok: true, source: 'proxy', loading: true }; }
+  if (!snap) { advanceWhaleCrawl().catch(() => {}); return { ok: true, source: 'proxy', loading: true }; }
   const wantLong = side !== 'short';
   const idxs = [];
   for (const r of (snap.byCoin[coin] || [])) {
@@ -465,7 +504,7 @@ async function getClusterWallets(q) {
   const coin = q && q.coin, price = num(q && q.price), mark = num(q && q.mark);
   if (!coin || !price) return { ok: false, error: 'bad cluster query' };
   const snap = whaleSnapshot;
-  if (!snap || !snap.byCoin[coin]) { refreshWhales().catch(() => {}); return { ok: true, loading: true, wallets: [], count: 0, totalUsd: 0 }; }
+  if (!snap || !snap.byCoin[coin]) { advanceWhaleCrawl().catch(() => {}); return { ok: true, loading: true, wallets: [], count: 0, totalUsd: 0 }; }
   const bandFrac = num(q && q.bandFrac) || 0.006;
   const lo = price * (1 - bandFrac), hi = price * (1 + bandFrac);
   const hits = [];

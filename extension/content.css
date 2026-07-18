@@ -93,6 +93,8 @@
 
 .hlx-chartfoot { display: flex; align-items: center; gap: 8px; margin: 6px 14px 2px; }
 .hlx-legend-lbl { font: 500 9px/1 var(--font-sans); letter-spacing: 0.02em; color: var(--text-lo); }
+.hlx-src-stale { color: #F0B90B; font-weight: 700; cursor: help; }
+.hlx-st-stalemark { color: var(--text-lo); opacity: 0.8; font-weight: 600; cursor: help; }
 .hlx-legend-lbl b { color: var(--text-mid); font-weight: 600; }
 .hlx-legend-lbl .hlx-src { color: var(--text-lo); opacity: 0.75; }
 .hlx-heatctl { margin-left: auto; display: flex; align-items: center; gap: 5px; }

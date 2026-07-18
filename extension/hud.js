@@ -175,6 +175,33 @@
     if (!(pct > 0)) return '';
     return ' <span class="hlx-cov" title="Tracked positions cover ~' + pct.toFixed(0) + '% of this coin&#39;s open interest (Σ tracked position value ÷ OI). A large real sample — not all of OI.">· ~' + (pct < 1 ? '<1' : pct.toFixed(0)) + '% of OI</span>';
   }
+  // ---- STALENESS HONESTY (v0.21.1): the data-source badge NEVER claims "real
+  // positions" for the offline bundle. Three states: live / live-partial (with
+  // wallet coverage) / bundled snapshot (amber, dated, marked STALE >24h). ----
+  function dataStale(vm) {
+    const m = vm && vm.levelsMeta;
+    if (!m || m.source !== 'bundled') return false;
+    if (m.bundleStale) return true;
+    if (!m.bundleUpdated) return true;                      // undated bundle = assume stale (honest default)
+    const t = Date.parse(m.bundleUpdated);
+    return !isFinite(t) || Date.now() - t > 24 * 3600 * 1000;
+  }
+  function srcBadgeHtml(vm) {
+    const m = vm && vm.levelsMeta;
+    if (m && m.source === 'bundled') {
+      const date = m.bundleUpdated ? String(m.bundleUpdated).slice(0, 10) : 'undated';
+      const stale = dataStale(vm);
+      return '<span class="hlx-src-stale" title="These walls are an OFFLINE snapshot generated ' + date + ', not live data' + (stale ? ' — older than 24h, positions have moved' : '') + '. The live top-wallet crawl replaces them incrementally as it progresses.">snapshot ' + date + (stale ? ' · STALE' : '') + ' — live crawl in progress</span>';
+    }
+    if (m && m.source === 'live-partial' && m.crawl) {
+      return '<b>live</b> <span class="hlx-src" title="Live per-wallet crawl in progress — walls from the ' + m.crawl.done + ' wallets crawled so far; the rest of the pass fills in over the next minutes.">· ' + m.crawl.done + ' of ' + m.crawl.total + ' wallets</span>' + coverageBadge(vm);
+    }
+    return '<b>real positions</b>' + coverageBadge(vm);
+  }
+  function updateSrcBadge(container, ctx) {
+    const el = container.querySelector('.hlx-legend-lbl');
+    if (el) el.innerHTML = srcBadgeHtml(ctx.vm);
+  }
   function bodyHtml(ctx, opts) {
     const vm = ctx.vm, loading = vm.liq.source !== 'live';
     const f = vm.funding, fCls = f && f.perDayPer1k > 0 ? 'hlx-neg' : 'hlx-pos';
@@ -240,7 +267,7 @@
           '<span class="hlx-vl-top">heavy</span><span class="hlx-vl-bar"></span><span class="hlx-vl-bot">light</span></div>' +
       '</div>' +
       '<div class="hlx-chartfoot">' +
-        '<span class="hlx-legend-lbl" title="Heat = real liquidation notional at each price, aggregated from the top wallets we can see — a large sample, not 100% of open interest. Bright zones = the real clusters."><b>real positions</b>' + coverageBadge(vm) + '</span>' +
+        '<span class="hlx-legend-lbl" title="Heat = liquidation notional at each price from the top wallets we can see. The badge tells you EXACTLY how fresh: live (full crawl) · live-partial (crawl running) · dated snapshot (offline bundle, stale-flagged).">' + srcBadgeHtml(vm) + '</span>' +
         (ctx.onAddr && !ctx.userAddr ? '<button class="hlx-watchaddr" title="Guardian couldn&#39;t auto-detect your connected address from the page — paste it to watch your REAL positions (read-only, public API)">watch addr</button>' : '') +
         '<span class="hlx-heatctl"><span class="hlx-foot-int">int</span><input class="hlx-intensity" type="range" min="0.3" max="0.9" step="0.05" value="' + inten + '" title="Heat contrast">' +
           '<span class="hlx-foot-int">opac</span><input class="hlx-opacity" type="range" min="0.1" max="1" step="0.05" value="' + opac + '" title="Heat opacity"></span>' +
@@ -282,7 +309,7 @@
         '<span class="hlx-st-ic">…</span> <b class="hlx-st-lev">' + (curLev != null ? curLev + '×' : '—') + '</b> · liq <b>' + VM.fmtPrice(liqPx) + '</b> · <span class="hlx-st-verdict">' + v.text.toLowerCase() + '</span></span>';
       clearDeps(); return;
     }
-    const cls = v.color === 'red' ? 'hlx-neg' : v.color === 'orange' ? 'hlx-warn' : 'hlx-pos';
+    let cls = v.color === 'red' ? 'hlx-neg' : v.color === 'orange' ? 'hlx-warn' : 'hlx-pos';
     const curL = curLev != null ? Math.round(curLev) : null;
     const levTxt = curLev != null ? curLev + '×' : '—';
     // ---- MERGED VERDICT: same verdict `v` drives the read AND the nearest-clear
@@ -351,12 +378,23 @@
       ? '<span class="hlx-st-liq" title="≈ cross liq is account-wide, not per-position — see the Portfolio view for your real cross liquidation">≈ liq <b>' + VM.fmtPrice(liqPx) + '</b></span>'
       : '<span class="hlx-st-liq">' + (guard ? 'your liq' : 'liq') + ' <b>' + VM.fmtPrice(liqPx) + '</b></span>';
     // GUARDIAN pre-liq CASCADE warning — kept, ONE short line (decision 5).
+    // STALE data (bundled >24h) → NEVER a red cascade alarm from fossil walls.
+    const stale = dataStale(vm);
     let cascadeWarn = '';
     const sideCascade = VM.computeCascade(vm, dir === 'short' ? 'up' : 'down');
     // proxy depth → no red alarm (review F3): the impact model is low-confidence
     // without real OI/volume; the card still shows it with a "low confidence" badge.
-    if (sideCascade && sideCascade.depthSource !== 'proxy' && (sideCascade.chain || sideCascade.totalLiqUsd >= BIG_WALL) && VM.cascadeHitsPrice(sideCascade, liqPx)) {
+    if (!stale && sideCascade && sideCascade.depthSource !== 'proxy' && (sideCascade.chain || sideCascade.totalLiqUsd >= BIG_WALL) && VM.cascadeHitsPrice(sideCascade, liqPx)) {
       cascadeWarn = '<div class="hlx-hud hlx-neg" title="A modeled liquidation cascade (real positions, estimated impact) would run through your liq before price gets there.">⚠ ' + usdM(sideCascade.totalLiqUsd) + ' cascade @ ' + VM.fmtPrice(sideCascade.triggerPx) + ' runs through your liq</div>';
+    }
+    // STALE data → cap the verdict's CONFIDENCE: a mint "clear" from 12-day-old
+    // walls is a lie. Clear degrades to amber "clear?" with a stale suffix; all
+    // levels get the dim "stale data" marker + tooltip caveat.
+    let staleSuffix = '';
+    if (stale) {
+      staleSuffix = '<span class="hlx-st-stalemark"> · stale data</span>';
+      lineTitle += ' CAUTION: walls are from an offline snapshot older than 24h (positions have moved) — treat this verdict as low-confidence until the live crawl covers this coin.';
+      if (v.level === 'clear') { cls = 'hlx-warn'; icon = '~'; verdictText = 'clear?'; }
     }
     // GUARDIAN: estimated ADL exposure segment (real position only) + the
     // hedge-leg amputation warning when THIS coin is the exposed leg.
@@ -371,7 +409,7 @@
     out.className = 'hlx-status ' + cls;
     out.innerHTML =
       '<span class="hlx-st-main" title="' + lineTitle.replace(/"/g, '&quot;') + '">' +
-        '<span class="hlx-st-ic">' + icon + '</span> <b class="hlx-st-lev">' + levTxt + '</b> · ' + liqSeg + ' · <span class="hlx-st-verdict">' + verdictText + '</span>' +
+        '<span class="hlx-st-ic">' + icon + '</span> <b class="hlx-st-lev">' + levTxt + '</b> · ' + liqSeg + ' · <span class="hlx-st-verdict">' + verdictText + '</span>' + staleSuffix +
       '</span>' + adlHtml + setBtn + hedgeWarn + cascadeWarn + liqOrder;
     renderCascadeCard(container, ctx);
 
@@ -758,9 +796,12 @@
     if (!show.length) { el.innerHTML = ''; return; }
     // PROXY-DEPTH honesty (review F3): without real OI/volume the depth proxy
     // overstates impact by 1/(4·coverage) — nearly everything "chains". Badge it.
+    // STALE-DATA honesty (v0.21.1): bundled walls >24h old → dim + stale suffix,
+    // never an alarming red cascade built from a fossil snapshot.
     const proxy = show.some((c) => c.depthSource === 'proxy');
-    el.innerHTML = '<div class="hlx-casc-line' + (proxy ? ' hlx-dim' : '') + '" title="Modeled cascade · real positions, estimated impact. Price entering a real liq cluster forces those liquidations → forced orders push price further → can reach the next cluster. The impact is an ESTIMATE, not a certain price.' + (proxy ? ' LOW CONFIDENCE: no open-interest/volume data for this coin — impact modeled from tracked liqs only and likely overstated.' : '') + '">' +
-      show.map(cascadeSeg).join('<span class="hlx-casc-dot"> · </span>') + (proxy ? '<span class="hlx-casc-tag"> · low confidence</span>' : '') + '</div>';
+    const stale = dataStale(vm);
+    el.innerHTML = '<div class="hlx-casc-line' + (proxy || stale ? ' hlx-dim' : '') + '" title="Modeled cascade · real positions, estimated impact. Price entering a real liq cluster forces those liquidations → forced orders push price further → can reach the next cluster. The impact is an ESTIMATE, not a certain price.' + (proxy ? ' LOW CONFIDENCE: no open-interest/volume data for this coin — impact modeled from tracked liqs only and likely overstated.' : '') + (stale ? ' STALE: walls are from an offline snapshot older than 24h — positions have moved; wait for the live crawl.' : '') + '">' +
+      show.map(cascadeSeg).join('<span class="hlx-casc-dot"> · </span>') + (proxy ? '<span class="hlx-casc-tag"> · low confidence</span>' : '') + (stale ? '<span class="hlx-casc-tag"> · stale data</span>' : '') + '</div>';
   }
 
   // ===== ADL EXPOSURE (estimated · profit×lev rank — HL's documented ADL =====
@@ -1669,11 +1710,11 @@
       wireControls(container, ctx, s, opts);
     } else { s.ctx = ctx; s.opts = opts; s.heatDirty = true; updateChartData(container, ctx, s); }
     s.ctx = ctx; s.opts = opts;
-    updateReadout(container, ctx); updatePortfolio(container, ctx); renderWalls(container, ctx); setAnchor(ctx, s);
+    updateReadout(container, ctx); updatePortfolio(container, ctx); renderWalls(container, ctx); updateSrcBadge(container, ctx); setAnchor(ctx, s);
     return { mounted: mount, dragHandle: container.querySelector('[data-drag]') };
   }
 
   g.HLHUD = { render, updateReadout, levEval, levLeverage, marketLean, positionRead, DISCLAIMER,
     // read-only test hooks (leverage-safety invariants; no side effects)
-    _t: { levClear, nearestClearLev, safeLeverage, dangerVerdict, heatAt, getHeatField, buildHeatField, bodyHtml, renderCascadeCard, adlSeg, hedgeRisk, portfolioStats, renderWalls, HEAT_HI, HEAT_MED } };
+    _t: { levClear, nearestClearLev, safeLeverage, dangerVerdict, heatAt, getHeatField, buildHeatField, bodyHtml, renderCascadeCard, adlSeg, hedgeRisk, portfolioStats, renderWalls, dataStale, srcBadgeHtml, HEAT_HI, HEAT_MED } };
 })(window);

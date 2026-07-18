@@ -200,6 +200,14 @@
       coin, markPx, maxLeverage, mmf: maintMarginFraction(maxLeverage),
       dataAsOf: Date.now(), smartMoney, liq, positions, liqLevels,
       liqLevelsSource: intel ? (intel.levelsSource || null) : null, funding,
+      // STALENESS HONESTY (v0.21.1): where the levels came from + how fresh —
+      // drives the chart-foot badge and verdict-confidence degradation.
+      levelsMeta: intel ? {
+        source: intel.levelsSource || null,
+        bundleUpdated: intel.bundleUpdated || null,
+        bundleStale: Boolean(intel.bundleStale),
+        crawl: intel.crawl || null
+      } : null,
       oiNtl: row ? row.oiNtl : null, dayNtlVlm: row ? row.dayNtlVlm : null,
       isHyperp: row ? Boolean(row.isHyperp) : false, loading: liq.source === 'loading'
     };
