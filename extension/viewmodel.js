@@ -206,6 +206,8 @@
         source: intel.levelsSource || null,
         bundleUpdated: intel.bundleUpdated || null,
         bundleStale: Boolean(intel.bundleStale),
+        coveragePct: intel.coveragePct != null ? intel.coveragePct : null,   // feed: REAL per-coin % of OI
+        feedUpdated: intel.feedUpdated || null,
         crawl: intel.crawl || null
       } : null,
       oiNtl: row ? row.oiNtl : null, dayNtlVlm: row ? row.dayNtlVlm : null,

@@ -188,6 +188,14 @@
   }
   function srcBadgeHtml(vm) {
     const m = vm && vm.levelsMeta;
+    if (m && m.source === 'feed') {
+      // BACKEND FEED (v0.22.0): REAL per-coin coverage from the feed — never a
+      // hardcoded number. <30% coverage gets an explicit "partial view" mark.
+      const ago = m.feedUpdated ? Math.max(0, Math.round((Date.now() - Date.parse(m.feedUpdated)) / 60000)) : null;
+      const cov = m.coveragePct != null ? m.coveragePct + '% of ' + vm.coin + ' OI' : 'coverage unknown';
+      return '<b>real positions</b> <span class="hlx-src" title="Live backend feed: the wallet universe is re-derived from the leaderboard (top accounts + top weekly volume) and re-crawled every ~15 min. Coverage = tracked notional ÷ open interest for THIS coin.">· live feed · ' + cov + (ago != null ? ' · updated ' + ago + 'm ago' : '') + '</span>' +
+        (m.coveragePct != null && m.coveragePct < 30 ? '<span class="hlx-src-partial" title="Under 30% of this coin&#39;s open interest is tracked — the walls you see are a PARTIAL view of the real book."> · partial view</span>' : '');
+    }
     if (m && m.source === 'bundled') {
       const date = m.bundleUpdated ? String(m.bundleUpdated).slice(0, 10) : 'undated';
       const stale = dataStale(vm);
@@ -263,6 +271,7 @@
       leanHtml(vm, ctx) +
       '<div class="hlx-chart-wrap">' +
         '<canvas class="hlx-heat"></canvas><div class="hlx-chart-lwc"></div><canvas class="hlx-overlay"></canvas><div class="hlx-cross"></div>' +
+        '<div class="hlx-edge-top"></div><div class="hlx-edge-bot"></div>' +
         '<div class="hlx-vlegend" title="Liquidation heat (viridis) from REAL top-wallet positions. Bright yellow = biggest real liquidation cluster; dark = few liquidations.">' +
           '<span class="hlx-vl-top">heavy</span><span class="hlx-vl-bar"></span><span class="hlx-vl-bot">light</span></div>' +
       '</div>' +
@@ -273,6 +282,7 @@
           '<span class="hlx-foot-int">opac</span><input class="hlx-opacity" type="range" min="0.1" max="1" step="0.05" value="' + opac + '" title="Heat opacity"></span>' +
       '</div>' +
       '<div class="hlx-walls"></div>' +
+      '<div class="hlx-thinwrap"></div>' +
       '<div class="hlx-drill"></div>' +
       '<div class="hlx-panel' + (guard ? ' hlx-guardian' : '') + (port ? ' hlx-port' : '') + '">' +
         '<div class="hlx-plan-title">' + title + '<span class="hlx-plan-info" title="' + sub.replace(/"/g, '&quot;') + ' · Read-only — HypeLens never places orders.">ⓘ</span>' + modeToggle(ctx) + '</div>' +
@@ -737,6 +747,72 @@
     for (const b of profile.buckets) { const y = series.priceToCoordinate(b.price); if (y == null || y < -4 || y > H + 4) continue; out.push({ b, y }); }
     return out;
   }
+  // ---- OFF-SCREEN WALL CONTEXT (v0.21.2): a truthfully-sparse visible range
+  // must not read as "broken/empty" — big walls OUTSIDE the viewport become
+  // edge chips, and a thin book gets ONE honest context line. NO fake density,
+  // no smoothing — context only. ----
+  // Pure: which ≥$10M walls sit outside the visible price range {lo,hi}?
+  // ≤2 per side → one chip each; >2 → ONE aggregate chip per side.
+  function edgeChips(profile, mark, range) {
+    if (!profile || !mark || !range || !(range.hi > range.lo)) return { top: [], bottom: [] };
+    const walls = profile.buckets.filter((b) => b.total >= BIG_WALL);
+    const mk = (b) => ({ price: b.price, usd: b.total, agg: false });
+    const side = (arr, above) => {
+      if (!arr.length) return [];
+      if (arr.length <= 2) return arr.slice().sort((a, b) => b.total - a.total).map(mk);
+      // >2 walls beyond this edge → aggregate into one chip (drill opens the biggest)
+      const total = arr.reduce((s2, b) => s2 + b.total, 0);
+      const biggest = arr.slice().sort((a, b) => b.total - a.total)[0];
+      const nearest = above ? Math.min.apply(null, arr.map((b) => b.price)) : Math.max.apply(null, arr.map((b) => b.price));
+      return [{ price: biggest.price, usd: total, agg: true, count: arr.length, nearest, side: above ? 'short' : 'long' }];
+    };
+    return { top: side(walls.filter((b) => b.price > range.hi), true), bottom: side(walls.filter((b) => b.price < range.lo), false) };
+  }
+  function edgeChipHtml(chip, above, mark) {
+    const arrow = above ? '▲' : '▼', cls = above ? 'hlx-pos' : 'hlx-neg';
+    const pct = mark ? (((chip.agg ? chip.nearest : chip.price) - mark) / mark) * 100 : null;
+    const pctTxt = pct != null ? ' (' + (pct > 0 ? '+' : '−') + Math.abs(pct).toFixed(0) + '%)' : '';
+    const body = chip.agg
+      ? usdM(chip.usd) + ' ' + (above ? 'shorts' : 'longs') + ' ' + shortPx(chip.nearest) + (above ? '+' : '−') + pctTxt
+      : usdM(chip.usd) + ' @ ' + shortPx(chip.price) + pctTxt;
+    return '<button class="hlx-wall-chip hlx-edge-chip ' + cls + '" data-price="' + chip.price + '" title="' +
+      (chip.agg ? chip.count + ' walls ≥$10M beyond this edge (' + usdM(chip.usd) + ' total) — off-screen, not gone. Tap for the biggest wall&#39;s wallets.' :
+        usdM(chip.usd) + ' in real liqs at ' + VM.fmtPrice(chip.price) + ' — outside the visible range. Tap for the wallets behind it.') +
+      '">' + arrow + ' ' + body + '</button>';
+  }
+  function renderEdgeChips(container, ctx, s) {
+    const top = container.querySelector('.hlx-edge-top'), bot = container.querySelector('.hlx-edge-bot');
+    if (!top || !bot) return;
+    let range = null;
+    try {
+      const H = s && s.lwcEl ? s.lwcEl.clientHeight : 0;
+      if (s && s.series && H > 10) {
+        const a = s.series.coordinateToPrice(0), b = s.series.coordinateToPrice(H);
+        if (a != null && b != null) range = { lo: Math.min(a, b), hi: Math.max(a, b) };
+      }
+    } catch (e) {}
+    if (!range) { top.innerHTML = ''; bot.innerHTML = ''; return; }
+    const ec = edgeChips(getProfile(s, ctx), ctx.vm.markPx, range);
+    top.innerHTML = ec.top.map((c) => edgeChipHtml(c, true, ctx.vm.markPx)).join('');
+    bot.innerHTML = ec.bottom.map((c) => edgeChipHtml(c, false, ctx.vm.markPx)).join('');
+  }
+  // Pure: thin-book read — fewer than 2 walls ≥$10M within ±15% of mark.
+  // Returns null on a dense book; else the honest context numbers.
+  function thinBook(profile, mark) {
+    if (!profile || !mark) return null;
+    const walls = profile.buckets.filter((b) => b.total >= BIG_WALL);
+    const inRange = walls.filter((b) => Math.abs(b.price - mark) / mark <= 0.15);
+    if (inRange.length >= 2) return null;
+    const below = walls.filter((b) => b.price < mark).sort((a, b) => b.price - a.price)[0] || null;
+    const above = walls.filter((b) => b.price > mark).sort((a, b) => a.price - b.price)[0] || null;
+    return { inRange: inRange.length, nearBelow: below, nearAbove: above, anyWalls: walls.length > 0 };
+  }
+  function thinBookHtml(tb) {
+    if (!tb) return '';
+    const near = [tb.nearBelow, tb.nearAbove].filter(Boolean).map((w) => shortPx(w.price)).join(' / ');
+    const tail = tb.anyWalls && near ? ' · whales are low-leverage, nearest liqs ' + near : ' · tracked whales carry no big liq walls here';
+    return '<div class="hlx-thinbook" title="Not a bug — the tracked whale set genuinely has ' + (tb.inRange === 0 ? 'no' : 'only ' + tb.inRange) + ' liquidation wall' + (tb.inRange === 1 ? '' : 's') + ' ≥$10M within ±15% of price. Sparse liqs = whales running LOW leverage — that is itself a market read. No fake density is drawn.">thin book — ' + tb.inRange + ' wall' + (tb.inRange === 1 ? '' : 's') + ' in range' + tail + '</div>';
+  }
   function usdM(n) { const m = n / 1e6; return '$' + (m >= 100 ? Math.round(m) : m >= 10 ? Math.round(m) : m.toFixed(1)) + 'M'; }
   const BIG_WALL = 10e6;   // a bucket ≥ $10M counts as a real wall
   const HEAT_HI = 0.5, HEAT_MED = 0.25;   // normalized heat-field intensity thresholds
@@ -837,12 +913,15 @@
   // ===== NAMED-WHALE LIQ DRILL-DOWN: which wallets compose a cluster? =====
   const EXPLORER = 'https://hypurrscan.io/address/';
   function renderWalls(container, ctx) {
-    const el = container.querySelector('.hlx-walls'); if (!el) return;
+    const el = container.querySelector('.hlx-walls'), tw = container.querySelector('.hlx-thinwrap');
+    if (!el) return;
     const s = container.__hlx;
     // needs the drill data source (content script); the popup has none → hide
-    if (!ctx.onClusterWallets || !ctx.vm || !ctx.vm.markPx) { el.innerHTML = ''; return; }
+    if (!ctx.onClusterWallets || !ctx.vm || !ctx.vm.markPx) { el.innerHTML = ''; if (tw) tw.innerHTML = ''; return; }
     const profile = getProfile(s, ctx);
-    if (!profile || !profile.ranked || !profile.ranked.length) { el.innerHTML = ''; return; }
+    if (!profile || !profile.ranked || !profile.ranked.length) { el.innerHTML = ''; if (tw) tw.innerHTML = ''; return; }
+    // THIN-BOOK context line (v0.21.2): a sparse book is information, not a bug.
+    if (tw) tw.innerHTML = thinBookHtml(thinBook(profile, ctx.vm.markPx));
     const top = profile.ranked.filter((b) => b.total >= BIG_WALL).slice(0, 3);
     if (!top.length) { el.innerHTML = ''; return; }
     el.innerHTML = '<span class="hlx-walls-lbl" title="The biggest real liquidation walls near price — tap one to see WHICH wallets compose it (top-wallet crawl).">walls</span>' +
@@ -1253,6 +1332,9 @@
       gx.save(); gx.shadowColor = MINT; gx.shadowBlur = 8; gx.fillStyle = MINT; roundRect(gx, px, ym - 9, pw, 18, 5); gx.fill(); gx.restore();
       gx.fillStyle = '#08090B'; gx.textAlign = 'left'; gx.fillText(t, px + 6, ym + 0.5);
     }
+    // OFF-SCREEN WALL edge chips — tracks the CURRENT visible range (zoom/pan
+    // re-runs drawOverlay), so "empty" viewports always say what lies beyond.
+    renderEdgeChips(container, ctx, s);
   }
   function drawLine(gx, x0, x1, y, color, dash, w) { gx.strokeStyle = color; gx.lineWidth = w || 1; gx.setLineDash(dash || []); gx.beginPath(); gx.moveTo(x0, y); gx.lineTo(x1, y); gx.stroke(); gx.setLineDash([]); }
   function drawTag(gx, x, y, text, color, align) { gx.font = '600 9px "JetBrains Mono", ui-monospace, Menlo, monospace'; const tw = gx.measureText(text).width, bx = align === 'right' ? x - tw - 5 : x; gx.fillStyle = 'rgba(8,9,11,0.78)'; gx.fillRect(bx - 1, y - 7, tw + 6, 14); gx.fillStyle = color; gx.textAlign = align; gx.fillText(text, align === 'right' ? x - 3 : x + 2, y); gx.textAlign = 'left'; }
@@ -1716,5 +1798,5 @@
 
   g.HLHUD = { render, updateReadout, levEval, levLeverage, marketLean, positionRead, DISCLAIMER,
     // read-only test hooks (leverage-safety invariants; no side effects)
-    _t: { levClear, nearestClearLev, safeLeverage, dangerVerdict, heatAt, getHeatField, buildHeatField, bodyHtml, renderCascadeCard, adlSeg, hedgeRisk, portfolioStats, renderWalls, dataStale, srcBadgeHtml, HEAT_HI, HEAT_MED } };
+    _t: { levClear, nearestClearLev, safeLeverage, dangerVerdict, heatAt, getHeatField, buildHeatField, bodyHtml, renderCascadeCard, adlSeg, hedgeRisk, portfolioStats, renderWalls, dataStale, srcBadgeHtml, edgeChips, edgeChipHtml, thinBook, thinBookHtml, getProfile, HEAT_HI, HEAT_MED, BIG_WALL } };
 })(window);

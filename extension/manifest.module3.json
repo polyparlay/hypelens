@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "HypeLens — Liquidation Heatmap & Smart Money (Module 3 / testnet)",
-  "version": "0.21.1",
+  "name": "HypeLens \u2014 Liquidation Heatmap & Smart Money (Module 3 / testnet)",
+  "version": "0.22.0",
   "description": "PHASE-2 build: read-only heatmap + opt-in one-click order placement (agent wallet + builder code, TESTNET only). To enable Module 3, copy this file over manifest.json.",
   "permissions": [
     "storage"
   ],
   "host_permissions": [
     "https://api.hyperliquid.xyz/*",
-    "https://api.hyperliquid-testnet.xyz/*"
+    "https://api.hyperliquid-testnet.xyz/*",
+    "https://raw.githubusercontent.com/*"
   ],
   "action": {
     "default_popup": "popup.module3.html",

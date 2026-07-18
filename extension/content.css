@@ -94,10 +94,23 @@
 .hlx-chartfoot { display: flex; align-items: center; gap: 8px; margin: 6px 14px 2px; }
 .hlx-legend-lbl { font: 500 9px/1 var(--font-sans); letter-spacing: 0.02em; color: var(--text-lo); }
 .hlx-src-stale { color: #F0B90B; font-weight: 700; cursor: help; }
+.hlx-src-partial { color: var(--text-lo); opacity: 0.8; font-weight: 600; cursor: help; }
 .hlx-st-stalemark { color: var(--text-lo); opacity: 0.8; font-weight: 600; cursor: help; }
 .hlx-legend-lbl b { color: var(--text-mid); font-weight: 600; }
 .hlx-legend-lbl .hlx-src { color: var(--text-lo); opacity: 0.75; }
 .hlx-heatctl { margin-left: auto; display: flex; align-items: center; gap: 5px; }
+
+/* OFF-SCREEN WALL edge chips — pinned to the chart's top/bottom edges */
+.hlx-edge-top, .hlx-edge-bot { position: absolute; left: 8px; right: 60px; display: flex; gap: 5px; pointer-events: none; z-index: 6; }
+.hlx-edge-top { top: 4px; } .hlx-edge-bot { bottom: 4px; }
+.hlx-edge-top:empty, .hlx-edge-bot:empty { display: none; }
+.hlx-edge-chip { pointer-events: auto; opacity: 0.78; background: rgba(10,11,16,0.85); backdrop-filter: blur(2px); font-size: 9px; padding: 3px 7px; }
+.hlx-edge-chip:hover { opacity: 1; }
+
+/* THIN-BOOK context line — a sparse book is information, not a bug */
+.hlx-thinwrap { margin: 3px 14px 0; }
+.hlx-thinwrap:empty { display: none; }
+.hlx-thinbook { font: 500 9.5px/1.4 var(--font-sans); color: var(--text-lo); cursor: help; }
 
 /* WALLS row — the biggest real liq walls as tap-to-drill chips */
 .hlx-walls { display: flex; align-items: center; gap: 6px; margin: 4px 14px 0; flex-wrap: wrap; }

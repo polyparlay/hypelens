@@ -15,3 +15,11 @@ HypeLens injects its read-only overlay pill only on the official Hyperliquid tra
 # injection. The separate trading build (later submission) adds the MAIN-world
 # window.ethereum bridge for opt-in order placement and MUST then disclose the
 # builder fee in the listing + UI per the CWS affiliate-ads policy.
+
+---
+
+## HypeLens v0.22.0 addition — `https://polyparlay.github.io/*`
+
+```
+HypeLens fetches ONE small precomputed JSON feed (liquidation clusters + per-coin coverage, ~70KB, refreshed every 15 minutes) from our static GitHub Pages host. This replaces hundreds of per-wallet API calls the extension would otherwise make itself, and is read-only public market data — no user data is ever sent (plain GET, no credentials, no query parameters derived from the user).
+```

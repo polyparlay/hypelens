@@ -65,6 +65,61 @@ let whaleSnapshot = null;             // { at, byCoin, n, done, complete }
 let crawlStateMem = null;             // in-progress pass (also persisted per chunk)
 let crawlBusy = false;
 
+// ---- BACKEND FEED (v0.22.0 — PRIMARY intel source) ----
+// A cron-published precomputed JSON (GitHub Pages) crawls the LIVE leaderboard
+// universe (union of top-500 by account value + top-700 by weekly volume,
+// ~1,100 wallets ≈ 50% of BTC OI) every 15 min — the static 300-wallet bundle
+// proved structurally unable to track a book whose positions churn in days.
+// Freshness rule: feed updated <20 min ago → use it (levelsSource:'feed');
+// stale/unreachable → in-browser chunked crawl → bundle (amber staleness
+// honesty at each degradation step).
+const FEED_URL = 'https://raw.githubusercontent.com/polyparlay/hypelens/main/docs/feed/hypelens-intel.json';  // raw serves the repo file directly — no Pages needed
+const FEED_FRESH_MS = 20 * 60 * 1000;   // feed considered live within this window
+const FEED_FETCH_GAP_MS = 3 * 60 * 1000; // min gap between fetch attempts
+const FEED_CACHE_KEY = 'feedCache';
+let feedCache = null;                    // { at, data }  (also in storage.session)
+let feedInflight = null;
+let feedLastAttempt = 0;
+async function fetchFeed() {
+  if (feedInflight) return feedInflight;
+  if (!feedCache) {
+    try { const o = await chrome.storage.session.get([FEED_CACHE_KEY]); feedCache = (o && o[FEED_CACHE_KEY]) || null; } catch (e) {}
+  }
+  const fresh = feedCache && feedCache.data && Date.now() - Date.parse(feedCache.data.updated || 0) < FEED_FRESH_MS;
+  if (fresh || Date.now() - feedLastAttempt < FEED_FETCH_GAP_MS) return feedCache;
+  feedLastAttempt = Date.now();
+  feedInflight = (async () => {
+    try {
+      const r = await fetch(FEED_URL, { cache: 'no-cache' });
+      if (!r.ok) throw new Error('feed HTTP ' + r.status);
+      const data = await r.json();
+      if (data && data.coins && data.updated) {
+        feedCache = { at: Date.now(), data };
+        try { const p = chrome.storage.session.set({ [FEED_CACHE_KEY]: feedCache }); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+        // remember the wallet universe ACROSS sessions → the in-browser fallback
+        // crawl targets the RIGHT wallets even before the next feed fetch.
+        if (Array.isArray(data.wallets) && data.wallets.length) {
+          try { const p2 = chrome.storage.local.set({ feedWallets: data.wallets }); if (p2 && p2.catch) p2.catch(() => {}); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    return feedCache;
+  })().finally(() => { feedInflight = null; });
+  return feedInflight;
+}
+function feedFresh() { return Boolean(feedCache && feedCache.data && Date.now() - Date.parse(feedCache.data.updated || 0) < FEED_FRESH_MS); }
+// feed positions → the same row shape the whale snapshot uses (heat/drill/ADL).
+function feedRows(coin) {
+  const c = feedCache && feedCache.data && feedCache.data.coins && feedCache.data.coins[coin];
+  if (!c || !Array.isArray(c.positions)) return null;
+  return c.positions.map((p) => ({ szi: p[2] === 0 ? 1 : -1, liqPx: p[0], posVal: p[1], addr: p[3] || '', pnl: 0, entryPx: p[4], acctVal: p[5] }));
+}
+// best per-coin rows for ADL / drill-down: fresh feed first, then the crawl.
+function bestRows(coin) {
+  if (feedFresh()) { const r = feedRows(coin); if (r && r.length) return r; }
+  return (whaleSnapshot && whaleSnapshot.byCoin[coin]) || null;
+}
+
 // Bundled REAL liquidation levels (top-wallets snapshot, generated offline) =
 // the instant-load profile shown before the live whale crawl covers the coin.
 // Shape: { updated, coins: { COIN: { mark, levels: [[liqPx, notional, side]] } } }.
@@ -282,12 +337,24 @@ async function getPredicted() {
 
 async function loadWhales() {
   if (whaleList) return whaleList;
+  const valid = (a) => /^0x[a-f0-9]{40}$/.test(a);
+  // PREFER the feed's CURRENT wallet universe (v0.22.0) — the fallback crawl
+  // then targets the wallets that actually hold today's positions. The bundled
+  // whales.json is only used when no feed has ever been seen on this profile.
+  try {
+    const fw = (feedCache && feedCache.data && feedCache.data.wallets) ||
+      ((await chrome.storage.local.get(['feedWallets'])) || {}).feedWallets;
+    if (Array.isArray(fw) && fw.length >= 50) {
+      whaleList = fw.map((a) => ({ a: String(a).toLowerCase(), pnl: 0 })).filter((w) => valid(w.a));
+      if (whaleList.length >= 50) return whaleList;
+    }
+  } catch (e) {}
   try {
     const r = await fetch(chrome.runtime.getURL('data/whales.json'));
     const j = await r.json();
     whaleList = (j.whales || [])
       .map((w) => ({ a: String(w.a).toLowerCase(), pnl: Number(w.pnl) || 0 }))
-      .filter((w) => /^0x[a-f0-9]{40}$/.test(w.a));
+      .filter((w) => valid(w.a));
   } catch { whaleList = []; }
   return whaleList;
 }
@@ -387,10 +454,11 @@ function shortAddr(a) { return a && a.length > 12 ? a.slice(0, 6) + '…' + a.sl
 
 // Per-coin REAL intel. Buckets liquidationPx into price walls (Σ posVal) and
 // nets signed notional into a smart-money side. `mark` classifies wall side.
-function computeCoinIntel(coin, mark) {
+// rowsOverride (v0.22.0): compute from FEED rows instead of the crawl snapshot.
+function computeCoinIntel(coin, mark, rowsOverride) {
   const snap = whaleSnapshot;
-  if (!snap) return null;
-  const rows = snap.byCoin[coin] || [];
+  if (!rowsOverride && !snap) return null;
+  const rows = rowsOverride || snap.byCoin[coin] || [];
   // smart money — net signed notional across profitable whales
   let longUsd = 0, shortUsd = 0, nWallets = 0;
   for (const r of rows) { nWallets++; if (r.szi > 0) longUsd += r.posVal; else shortUsd += r.posVal; }
@@ -421,12 +489,30 @@ function computeCoinIntel(coin, mark) {
     }
     positions.sort((a, b2) => b2.sizeUsd - a.sizeUsd);
   }
-  return { coin, walls: walls.slice(0, 12), positions: positions.slice(0, 500), smartMoney, nWhales: snap.n, at: snap.at };
+  return { coin, walls: walls.slice(0, 12), positions: positions.slice(0, 500), smartMoney,
+    nWhales: rowsOverride ? rows.length : snap.n, at: rowsOverride ? Date.now() : snap.at };
 }
 
 async function getCoinIntel(coin, mark) {
   if (!coin) return { ok: true, loading: true };
   await loadRealLiq();                              // bundled instant-load data
+  // ---- PRIMARY (v0.22.0): the backend feed — fresh (<20 min) → use it ----
+  await fetchFeed();
+  if (feedFresh()) {
+    const rows = feedRows(coin);
+    if (rows && rows.length >= 2) {
+      const fc = feedCache.data.coins[coin];
+      const intel = computeCoinIntel(coin, mark || fc.mark, rows);
+      const levels = (intel.positions || []).map((p) => ({ price: p.price, sizeUsd: p.sizeUsd, side: p.side }));
+      const pct = fc.coverage ? fc.coverage.pct : null;
+      const agoMin = Math.max(0, Math.round((Date.now() - Date.parse(feedCache.data.updated)) / 60000));
+      return { ok: true, loading: false, ...intel, levels, levelsSource: 'feed',
+        coveragePct: pct, feedUpdated: feedCache.data.updated,
+        crawl: { done: (feedCache.data.wallets || []).length, total: (feedCache.data.wallets || []).length, complete: true },
+        coverage: { note: 'live feed · ' + (pct != null ? pct + '% of ' + coin + ' OI' : rows.length + ' tracked positions') + ' · updated ' + agoMin + 'm ago' } };
+    }
+  }
+  // ---- FALLBACK: in-browser chunked crawl (0.21.1 machinery) → bundle ----
   await rehydrateWhaleSnapshot();                   // SW may have restarted — reuse persisted crawl
   advanceWhaleCrawl().catch(() => {});              // every message advances one chunk
   const live = computeCoinIntel(coin, mark);         // null until first (partial) snapshot
@@ -472,6 +558,7 @@ function adlIndexCalc(isLong, markPx, entryPx, notional, accountValue) {
   return { index: profitRatio * (notional / accountValue), profitRatio };
 }
 async function getAdlRank(q) {
+  await fetchFeed();                 // feed rows carry entryPx/acctVal too
   await rehydrateWhaleSnapshot();
   const coin = q && q.coin, side = q && q.side, mark = num(q && q.mark);
   const user = adlIndexCalc(side !== 'short', mark, num(q && q.entryPx), num(q && q.notional), num(q && q.accountValue));
@@ -479,11 +566,11 @@ async function getAdlRank(q) {
   // ADL force-closes PROFITABLE positions on the winning side — a losing
   // position is effectively not in the queue.
   if (user.profitRatio <= 1) return { ok: true, source: 'proxy', eligible: false, tier: 'none', n: 0 };
-  const snap = whaleSnapshot;
-  if (!snap) { advanceWhaleCrawl().catch(() => {}); return { ok: true, source: 'proxy', loading: true }; }
+  const rows = bestRows(coin);
+  if (!rows) { advanceWhaleCrawl().catch(() => {}); return { ok: true, source: 'proxy', loading: true }; }
   const wantLong = side !== 'short';
   const idxs = [];
-  for (const r of (snap.byCoin[coin] || [])) {
+  for (const r of rows) {
     if ((r.szi > 0) !== wantLong) continue;
     const a = adlIndexCalc(wantLong, mark, r.entryPx, r.posVal, r.acctVal);
     if (a && a.profitRatio > 1) idxs.push(a.index);   // only in-profit peers queue
@@ -503,13 +590,14 @@ async function getClusterWallets(q) {
   await rehydrateWhaleSnapshot();
   const coin = q && q.coin, price = num(q && q.price), mark = num(q && q.mark);
   if (!coin || !price) return { ok: false, error: 'bad cluster query' };
-  const snap = whaleSnapshot;
-  if (!snap || !snap.byCoin[coin]) { advanceWhaleCrawl().catch(() => {}); return { ok: true, loading: true, wallets: [], count: 0, totalUsd: 0 }; }
+  await fetchFeed();
+  const rows = bestRows(coin);
+  if (!rows || !rows.length) { advanceWhaleCrawl().catch(() => {}); return { ok: true, loading: true, wallets: [], count: 0, totalUsd: 0 }; }
   const bandFrac = num(q && q.bandFrac) || 0.006;
   const lo = price * (1 - bandFrac), hi = price * (1 + bandFrac);
   const hits = [];
   let totalUsd = 0;
-  for (const r of snap.byCoin[coin]) {
+  for (const r of rows) {
     if (r.liqPx == null || r.liqPx < lo || r.liqPx > hi || !(r.posVal > 0)) continue;
     totalUsd += r.posVal;
     hits.push({ addr: r.addr, short: shortAddr(r.addr), side: r.szi > 0 ? 'long' : 'short',
