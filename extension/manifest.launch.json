@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "HypeLens — Liquidation Heatmap & Smart Money",
-  "version": "0.17.0",
+  "version": "0.22.0",
   "description": "Read-only liquidation heatmap from real top-wallet positions, smart-money positioning and a liq-aware leverage planner for the official Hyperliquid app. No wallet access, no execution, no tracking.",
   "permissions": [
     "storage"
   ],
   "host_permissions": [
-    "https://api.hyperliquid.xyz/*"
+    "https://api.hyperliquid.xyz/*",
+    "https://raw.githubusercontent.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
