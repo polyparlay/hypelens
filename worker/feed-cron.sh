@@ -2,6 +2,10 @@
 # HYPELENS-INTEL-FEED — regenerate docs/feed/hypelens-intel.json from the live
 # leaderboard universe and push it (skip if unchanged). Cron: every 15 min.
 set -u
+export PATH="/opt/homebrew/bin:/usr/bin:/bin"
+# cron has no keychain session → osxkeychain can return nothing; gh's token
+# store works headless, so pushes go through gh's credential helper.
+GITC=(git -c "credential.helper=" -c "credential.helper=!/opt/homebrew/bin/gh auth git-credential")
 REPO="/Users/clawdlawd/hypelens"
 LOG="$REPO/worker/feed-cron.log"
 cd "$REPO" || exit 1
@@ -13,7 +17,7 @@ cd "$REPO" || exit 1
   else
     git add docs/feed/hypelens-intel.json
     git commit -q -m "feed: intel update $(date -u +%FT%TZ)" -m "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" -- docs/feed/hypelens-intel.json && \
-    git push -q origin main && echo "pushed" || echo "push failed"
+    "${GITC[@]}" push -q origin main && echo "pushed" || echo "push failed"
   fi
 } >> "$LOG" 2>&1
 # keep the log bounded
