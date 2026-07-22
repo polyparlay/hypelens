@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.polyparlay/hypelens-agent-rail",
+  "description": "Real-data Hyperliquid risk intelligence for trading agents: liquidation walls, cascade chains, whale book, and pre-trade liq checks from a live 1,100-wallet position crawl — plus risk-checked, testnet-gated order placement.",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/polyparlay/hypelens",
+    "source": "github",
+    "subfolder": "agent-rail"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "hypelens-agent-rail",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environment_variables": [
+        {
+          "name": "HYPELENS_AGENT_PK",
+          "description": "Optional: agent-wallet private key for order placement (risk tools need no key)",
+          "is_required": false,
+          "is_secret": true
+        },
+        {
+          "name": "HYPELENS_NET",
+          "description": "Optional: 'testnet' (default) or 'mainnet' (placement hard-blocked until enabled)",
+          "is_required": false,
+          "is_secret": false
+        }
+      ]
+    }
+  ]
+}

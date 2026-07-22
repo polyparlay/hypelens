@@ -1,0 +1,23 @@
+# Smithery.ai listing config — https://smithery.ai/docs/config
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      hypelensAgentPk:
+        type: string
+        description: "Optional agent-wallet private key for order placement. Risk tools (walls, cascade, pretrade check, whale book) work without any key."
+      hypelensNet:
+        type: string
+        enum: [testnet, mainnet]
+        default: testnet
+        description: "Execution network. Mainnet placement is hard-blocked in code until operator-enabled."
+  commandFunction: |-
+    (config) => ({
+      command: 'node',
+      args: ['bin/hypelens-rail-mcp.js'],
+      env: {
+        ...(config.hypelensAgentPk ? { HYPELENS_AGENT_PK: config.hypelensAgentPk } : {}),
+        ...(config.hypelensNet ? { HYPELENS_NET: config.hypelensNet } : {})
+      }
+    })
