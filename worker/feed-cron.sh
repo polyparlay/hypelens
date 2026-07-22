@@ -7,7 +7,7 @@ LOG="$REPO/worker/feed-cron.log"
 cd "$REPO" || exit 1
 {
   echo "--- $(date -u +%FT%TZ) feed run"
-  /usr/bin/env node worker/aggregate-intel.mjs 2>&1 | tail -5
+  /opt/homebrew/bin/node worker/aggregate-intel.mjs 2>&1 | tail -5
   if git diff --quiet -- docs/feed/hypelens-intel.json 2>/dev/null && git diff --cached --quiet -- docs/feed/hypelens-intel.json 2>/dev/null && [ -n "$(git ls-files docs/feed/hypelens-intel.json)" ]; then
     echo "feed unchanged — skip commit"
   else

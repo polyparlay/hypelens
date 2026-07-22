@@ -51,8 +51,11 @@ const wilson = (k, n, z = 1.96) => {
 
 // ================= COLLECT =================
 async function collect() {
-  // 1. whale crawl via the existing aggregator (same data path the extension uses)
-  const intel = JSON.parse(execFileSync(process.execPath, [join(REPO, 'worker', 'aggregate-intel.mjs')], { maxBuffer: 64e6 }).toString());
+  // 1. whale crawl via the existing aggregator (same data path the extension uses).
+  // method:2 (PREREG-ADDENDUM-2): v0.22 aggregator writes docs/feed/hypelens-intel.json
+  // and logs to stderr only — read the feed file, not stdout.
+  execFileSync(process.execPath, [join(REPO, 'worker', 'aggregate-intel.mjs')], { stdio: ['ignore', 'ignore', 'inherit'], maxBuffer: 64e6 });
+  const intel = JSON.parse(readFileSync(join(REPO, 'docs', 'feed', 'hypelens-intel.json'), 'utf8'));
   // 2. oiNtl / dayNtlVlm per coin from one metaAndAssetCtxs call
   const [meta, ctxs] = await post({ type: 'metaAndAssetCtxs' });
   const rowByCoin = {};
@@ -65,7 +68,8 @@ async function collect() {
   let n = 0;
   for (const [coin, d] of Object.entries(intel.coins || {})) {
     const row = rowByCoin[coin]; if (!row || !row.markPx) continue;
-    const liqLevels = (d.liqClusters || []).map((c) => ({ price: c.price, sizeUsd: c.sizeUsd }));
+    // feed positions are [liqPx, notionalUsd, sideIdx, addr, entryPx, ...]
+    const liqLevels = (d.positions || []).map((p) => ({ price: p[0], sizeUsd: p[1] }));
     if (!liqLevels.length) continue;
     const vm = { coin, markPx: row.markPx, oiNtl: row.oiNtl, dayNtlVlm: row.dayNtlVlm, liqLevels };
     const down = VM.computeCascade(vm, 'down'), up = VM.computeCascade(vm, 'up');
@@ -77,7 +81,7 @@ async function collect() {
       if (dist <= MAGNET_NEAR && (!magnet || l.sizeUsd > magnet.sizeUsd)) magnet = { price: l.price, sizeUsd: l.sizeUsd, distFrac: dist, side: l.price < row.markPx ? 'below' : 'above' };
     }
     const slim = (c) => c && { chain: c.chain, triggerPx: c.triggerPx, terminalPx: c.terminalPx, totalLiqUsd: c.totalLiqUsd, hops: c.hops.length, depthSource: c.depthSource, dropFrac: c.dropFrac };
-    appendFileSync(SNAPS, JSON.stringify({ ts, coin, markPx: row.markPx, oiNtl: row.oiNtl, dayNtlVlm: row.dayNtlVlm, nLevels: liqLevels.length, totalLiqUsd: liqLevels.reduce((s, l) => s + l.sizeUsd, 0), down: slim(down), up: slim(up), magnet }) + '\n');
+    appendFileSync(SNAPS, JSON.stringify({ ts, coin, method: 2, markPx: row.markPx, oiNtl: row.oiNtl, dayNtlVlm: row.dayNtlVlm, nLevels: liqLevels.length, totalLiqUsd: liqLevels.reduce((s, l) => s + l.sizeUsd, 0), down: slim(down), up: slim(up), magnet }) + '\n');
     n++;
   }
   console.log('collected ' + n + ' coin snapshots @ ' + new Date(ts).toISOString());
