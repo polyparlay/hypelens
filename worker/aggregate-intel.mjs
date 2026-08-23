@@ -40,10 +40,22 @@ const BAND = 0.50;             // keep liqs within ±50% of mark
 const MAX_POS_PER_COIN = 400;  // size bound (top by notional)
 const MIN_POS_USD = 20000;     // ignore dust positions
 
-async function post(body) {
-  const r = await fetch(INFO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) throw new Error('info ' + body.type + ' HTTP ' + r.status);
-  return r.json();
+async function post(body, tries = 4) {
+  // transient UND_ERR_CONNECT_TIMEOUT etc. must not kill the whole crawl —
+  // retry with backoff + per-attempt timeout before giving up.
+  for (let a = 1; ; a++) {
+    try {
+      const r = await fetch(INFO, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body), signal: AbortSignal.timeout(15000)
+      });
+      if (!r.ok) throw new Error('info ' + body.type + ' HTTP ' + r.status);
+      return r.json();
+    } catch (e) {
+      if (a >= tries) throw e;
+      await new Promise((res) => setTimeout(res, 1000 * a * a));
+    }
+  }
 }
 const num = (v) => { const n = parseFloat(v); return isNaN(n) || !isFinite(n) ? null : n; };
 const perf = (row, name) => { const wp = (row.windowPerformances || []).find((w) => w[0] === name); return wp ? wp[1] : null; };
